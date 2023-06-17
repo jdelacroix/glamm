@@ -14,10 +14,14 @@
   * limitations under the License.
   */
 
-
+#include <GL/glew.h>
 #include <GL/glut.h>
 
 #include <chrono>
+#include <fstream>
+#include <string>
+#include <sstream>
+#include <iostream>
 
 #include <cstdlib>
 #include <cmath>
@@ -27,6 +31,13 @@ float _g = 0.5f;
 float _b = 0.0f;
 
 std::chrono::time_point<std::chrono::system_clock> _ts;
+
+float _vertices[] = {
+  -1.0f, -1.0f, 0.0f,
+   1.0f, -1.0f, 0.0f,
+   1.0f,  1.0f, 0.0f,
+  -1.0f,  1.0f, 0.0f
+};
 
 
 void handle_key_event(unsigned char key, int x, int y) {
@@ -74,15 +85,43 @@ void cycle_color() {
 
 int main(int argc, char **argv) {
 
+  // initialize glut
   glutInit(&argc, argv);
 
   glutInitWindowSize(200, 200);
-
-
   glutCreateWindow("Hello, world!");
   glutKeyboardFunc(&handle_key_event);
   glutDisplayFunc(&display);
   glutIdleFunc(&cycle_color);
+
+  // initialize glew
+  GLenum glerr = glewInit();
+  if (glerr != GLEW_OK) {
+    std::cerr << "GLEW is not OK!" << std::endl;
+    return EXIT_FAILURE;
+  }
+
+  // read in vertex shader
+  std::ifstream ifs("shaders/glamm.vert", std::ios::binary);
+  std::string src;
+  src.assign(std::istreambuf_iterator<char>(ifs),
+                std::istreambuf_iterator<char>());
+  const char *vsc = src.c_str();
+
+  unsigned int vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+  glShaderSource(vertex_shader, 1, &vsc, nullptr);
+  glCompileShader(vertex_shader);
+
+  // vertex shader error checking
+  int glsuccess;
+  char info_log[512];
+  glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &glsuccess);
+
+  if (!glsuccess) {
+    glGetShaderInfoLog(vertex_shader, 512, nullptr, info_log);
+    std::cerr << "Vertex shader compilation failed! " << info_log << std::endl;
+    return EXIT_FAILURE;
+  }
 
 
   _ts = std::chrono::system_clock::now();

@@ -2,12 +2,16 @@ cmake_minimum_required(VERSION 3.12)
 
 project(glamm)
 
+set(CMAKE_CXX_STANDARD 14)
+
 find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED)
+find_package(GLEW REQUIRED)
 
 include_directories(
   ${OPENGL_INCLUDE_DIRS}
   ${GLUT_INCLUDE_DIRS}
+  ${GLEW_INCLUDE_DIRS}
 )
 
 add_executable(
@@ -19,4 +23,9 @@ target_link_libraries(
   ${PROJECT_NAME}
   ${OPENGL_LIBRARIES}
   ${GLUT_LIBRARIES}
+  ${GLEW_LIBRARIES}
 )
+
+# shaders
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/glamm/shaders/glamm.vert ${CMAKE_CURRENT_BINARY_DIR}/shaders/glamm.vert COPYONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/glamm/shaders/glamm.frag ${CMAKE_CURRENT_BINARY_DIR}/shaders/glamm.frag COPYONLY)
