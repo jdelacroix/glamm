@@ -71,6 +71,15 @@ void cycle_color() {
   auto ts = std::chrono::system_clock::now();
 
   if (std::chrono::duration_cast<std::chrono::milliseconds>(ts - _ts) >= std::chrono::milliseconds(250)) {
+    
+    GLint url = glGetUniformLocation(_shader_program, "input_color");
+
+    _r = fmod(_r+0.1f, 1.0f);
+    _g = fmod(_g+0.1f, 1.0f);
+    _b = fmod(_b+0.1f, 1.0f);
+    
+    glUniform3f(url, _r, _g, _b);
+    
     _ts = ts;
 
     glutPostRedisplay();
