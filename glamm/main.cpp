@@ -39,6 +39,9 @@ float _vertices[] = {
   -1.0f,  1.0f, 0.0f
 };
 
+unsigned int _shader_program = 0;
+unsigned int _vao = 0, _vbo = 0;
+
 
 void handle_key_event(unsigned char key, int x, int y) {
   switch (key) {
@@ -56,14 +59,9 @@ void display() {
 
   glViewport(0, 0, 100, 100);
 
-  glColor3f(_r, _g, _b);
-
-  glBegin(GL_POLYGON);
-    glVertex2f(-1.0f, -1.0f);
-    glVertex2f( 1.0f, -1.0f);
-    glVertex2f( 1.0f,  1.0f);
-    glVertex2f(-1.0f,  1.0f);
-  glEnd();
+  glUseProgram(_shader_program);
+  glBindVertexArray(_vao);
+  glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
   glFlush();
 }
@@ -73,10 +71,6 @@ void cycle_color() {
   auto ts = std::chrono::system_clock::now();
 
   if (std::chrono::duration_cast<std::chrono::milliseconds>(ts - _ts) >= std::chrono::milliseconds(250)) {
-    _r = fmod(_r + 0.1f, 1.0f);
-    _g = fmod(_g + 0.1f, 1.0f);
-    _b = fmod(_b + 0.1f, 1.0f);
-
     _ts = ts;
 
     glutPostRedisplay();
@@ -109,18 +103,19 @@ int main(int argc, char **argv) {
   const char *vsc = src.c_str();
   ifs.close();
 
-  unsigned int vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-  glShaderSource(vertex_shader, 1, &vsc, nullptr);
-  glCompileShader(vertex_shader);
+  unsigned int v_shader = glCreateShader(GL_VERTEX_SHADER);
+  glShaderSource(v_shader, 1, &vsc, nullptr);
+  glCompileShader(v_shader);
 
   // vertex shader error checking
   int glsuccess;
   char info_log[512];
-  glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &glsuccess);
+  glGetShaderiv(v_shader, GL_COMPILE_STATUS, &glsuccess);
 
   if (!glsuccess) {
-    glGetShaderInfoLog(vertex_shader, 512, nullptr, info_log);
+    glGetShaderInfoLog(v_shader, 512, nullptr, info_log);
     std::cerr << "Vertex shader compilation failed! " << info_log << std::endl;
+    glDeleteShader(v_shader);
     return EXIT_FAILURE;
   }
 
@@ -139,8 +134,41 @@ int main(int argc, char **argv) {
   if (!glsuccess) {
     glGetShaderInfoLog(f_shader, 512, nullptr, info_log);
     std::cerr << "Fragment shader compilation failed! " << info_log << std::endl;
+    glDeleteShader(v_shader);
+    glDeleteShader(f_shader);
     return EXIT_FAILURE;
   }
+
+  // create shader program
+  _shader_program = glCreateProgram();
+  glAttachShader(_shader_program, v_shader);
+  glAttachShader(_shader_program, f_shader);
+  glLinkProgram(_shader_program);
+
+  glGetProgramiv(_shader_program, GL_LINK_STATUS, &glsuccess);
+  if (!glsuccess) {
+    glGetProgramInfoLog(_shader_program, 512, nullptr, info_log);
+    std::cerr << "Shader program failed to link! " << info_log << std::endl;
+    return EXIT_FAILURE;
+  }
+
+  glDeleteShader(v_shader);
+  glDeleteShader(f_shader);
+
+  // setup
+  glGenVertexArrays(1, &_vao);
+  glGenBuffers(1, &_vbo);
+
+  glBindVertexArray(_vao);
+
+  glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(_vertices), _vertices, GL_STATIC_DRAW);
+
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (void*) 0);
+  glEnableVertexAttribArray(0);
+
+  glBindBuffer(GL_ARRAY_BUFFER, 0); // unbind vbo
+  glBindVertexArray(0); // unbind vao
 
   _ts = std::chrono::system_clock::now();
   glutMainLoop();
