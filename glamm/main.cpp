@@ -107,6 +107,7 @@ int main(int argc, char **argv) {
   src.assign(std::istreambuf_iterator<char>(ifs),
                 std::istreambuf_iterator<char>());
   const char *vsc = src.c_str();
+  ifs.close();
 
   unsigned int vertex_shader = glCreateShader(GL_VERTEX_SHADER);
   glShaderSource(vertex_shader, 1, &vsc, nullptr);
@@ -123,6 +124,23 @@ int main(int argc, char **argv) {
     return EXIT_FAILURE;
   }
 
+  // read in fragment shader
+  ifs.open("shaders/glamm.frag", std::ios::binary);
+  src.assign(std::istreambuf_iterator<char>(ifs), std::istreambuf_iterator<char>());
+  ifs.close();
+  const char *f_src = src.c_str();
+
+  unsigned int f_shader = glCreateShader(GL_FRAGMENT_SHADER);
+  glShaderSource(f_shader, 1, &f_src, nullptr);
+  glCompileShader(f_shader);
+
+  glGetShaderiv(f_shader, GL_COMPILE_STATUS, &glsuccess);
+
+  if (!glsuccess) {
+    glGetShaderInfoLog(f_shader, 512, nullptr, info_log);
+    std::cerr << "Fragment shader compilation failed! " << info_log << std::endl;
+    return EXIT_FAILURE;
+  }
 
   _ts = std::chrono::system_clock::now();
   glutMainLoop();
