@@ -34,6 +34,8 @@ public:
 private:
   // 4 vertices * (3 coordinates + 3 color + 2 texture coordinates) bytes
   std::array<float, 32> vertices_;
+
+  std::array<float, 4> viewport_;
 };
 
 }
