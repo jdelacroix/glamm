@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include "occupancy_grid_texture_map.hpp"
+
 #include <GL/glew.h>
 #include <GL/glut.h>
 
@@ -32,8 +34,8 @@ float _b = 0.0f;
 
 std::chrono::time_point<std::chrono::system_clock> _ts;
 
-float _vertices[] = { -1.0f, -1.0f, 0.0f, 1.0f,  -1.0f, 0.0f,
-                      1.0f,  1.0f,  0.0f, -1.0f, 1.0f,  0.0f };
+float _vertices[] = { -1.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f,
+                      1.0f,  0.0f, 0.0f, 0.0f, 1.0f,  0.0f };
 
 unsigned int _shader_program = 0;
 unsigned int _vao = 0, _vbo = 0;
@@ -170,6 +172,10 @@ main(int argc, char** argv)
   glDeleteShader(f_shader);
 
   // setup
+
+  glamm::OccupancyGridTextureMap map(
+    0.0, 0.0, 0.0, 100, 100); // remove before flight
+
   glGenVertexArrays(1, &_vao);
   glGenBuffers(1, &_vbo);
 

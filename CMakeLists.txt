@@ -7,16 +7,19 @@ set(CMAKE_CXX_STANDARD 14)
 find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED)
 find_package(GLEW REQUIRED)
+find_package(glm REQUIRED)
 
 include_directories(
   ${OPENGL_INCLUDE_DIRS}
   ${GLUT_INCLUDE_DIRS}
   ${GLEW_INCLUDE_DIRS}
+  ${GLM_INCLUDE_DIRS}
 )
 
 add_executable(
   ${PROJECT_NAME}
   glamm/main.cpp
+  glamm/occupancy_grid_texture_map.cpp
 )
 
 target_link_libraries(
@@ -24,6 +27,7 @@ target_link_libraries(
   ${OPENGL_LIBRARIES}
   ${GLUT_LIBRARIES}
   ${GLEW_LIBRARIES}
+  # ${GLM_LIBRARIES} header only
 )
 
 # shaders
