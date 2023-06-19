@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <glm/glm.hpp>
+
 #include <array>
 #include <cstddef>
 
@@ -32,10 +34,8 @@ public:
                           const size_t height);
 
 private:
-  // 4 vertices * (3 coordinates + 3 color + 2 texture coordinates) bytes
-  std::array<float, 32> vertices_;
-
-  std::array<float, 4> viewport_;
+  std::array<glm::vec4, 4> vertices_;
+  glm::mat4 model_;
 };
 
 }
