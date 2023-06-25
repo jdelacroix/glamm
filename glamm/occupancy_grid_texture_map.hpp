@@ -30,8 +30,10 @@ public:
   OccupancyGridTextureMap(const float position_x,
                           const float position_y,
                           const float orientation_z,
-                          const size_t width,
-                          const size_t height);
+                          const float width,
+                          const float height);
+
+  virtual ~OccupancyGridTextureMap();
 
   void draw() const;
   glm::mat4 model() const;

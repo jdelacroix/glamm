@@ -42,7 +42,7 @@ float _b = 0.0f;
 std::chrono::time_point<std::chrono::system_clock> _ts;
 
 unsigned int _draw_map = 0;
-unsigned int _height = 800, _width = 800;
+unsigned int _width = 100, _height = 100;
 
 void
 handle_key_event(unsigned char key, int x, int y)
@@ -59,6 +59,7 @@ handle_key_event(unsigned char key, int x, int y)
 void
 display()
 {
+
   glViewport(0, 0, _width, _height);
 
   glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // white bg
@@ -66,9 +67,11 @@ display()
 
   glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-  glUseProgram(_draw_map);
+  const float c = glm::sqrt(2.0f * 25.0f * 25.0f);
 
-  glamm::OccupancyGridTextureMap map(0.0f, 0.0f, 0.0f, 50.0f, 100.0f);
+  glamm::OccupancyGridTextureMap map(c, c, glm::pi<float>() / 4.0f, 50, 50);
+
+  glUseProgram(_draw_map);
 
   glm::mat4 model = map.model();
   glUniformMatrix4fv(glGetUniformLocation(_draw_map, "model"),
@@ -77,10 +80,9 @@ display()
                      glm::value_ptr(model));
 
   glm::mat4 view(1.0f);
-  view = glm::lookAt(glm::vec3(0.0f, 0.0f, 1.0f),
-                     glm::vec3(0.0f, 0.0f, 0.0f),
-                     glm::vec3(0.0f, 1.0f, 0.0f));
-  // view = glm::translate(view, glm::vec3(0.0f, 0.0f, 0.0f));
+  // view = glm::lookAt(glm::vec3(0.0f, 0.0f, 1.0f),
+  //                    glm::vec3(0.0f, 0.0f, 0.0f),
+  //                    glm::vec3(0.0f, 1.0f, 0.0f));
 
   glUniformMatrix4fv(
     glGetUniformLocation(_draw_map, "view"), 1, GL_FALSE, glm::value_ptr(view));

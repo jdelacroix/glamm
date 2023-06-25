@@ -27,22 +27,20 @@ namespace glamm {
 OccupancyGridTextureMap::OccupancyGridTextureMap(const float position_x,
                                                  const float position_y,
                                                  const float orientation_z,
-                                                 const size_t width,
-                                                 const size_t height)
+                                                 const float width,
+                                                 const float height)
 {
   // position is location at center of map
 
   float vertices[] = {
-    width / 2.0f,  height / 2.0f,  1.0f, 1.0f, // top right
-    width / 2.0f,  -height / 2.0f, 1.0f, 0.0f, // bottom right
-    -width / 2.0f, -height / 2.0f, 0.0f, 0.0f, // bottom left
-    -width / 2.0f, height / 2.0f,  0.0f, 1.0f, // top left
+    width / 2.0f,  height / 2.0f,  0.0f, // 1.0f, 1.0f, // top right
+    width / 2.0f,  -height / 2.0f, 0.0f, // 1.0f, 0.0f, // bottom right
+    -width / 2.0f, -height / 2.0f, 0.0f, // 0.0f, 0.0f, // bottom left
+    -width / 2.0f, height / 2.0f,  0.0f  // 0.0f, 1.0f, // top left
   };
 
-  std::cout << (width / 2.0f) << "," << (height / 2.0f) << std::endl;
-
-  unsigned int indices[]{ 0, 1, 3, //
-                          1, 2, 3 };
+  unsigned int indices[] = { 0, 1, 3, //
+                             1, 2, 3 };
 
   glGenVertexArrays(1, &(this->vao_));
   glGenBuffers(1, &(this->vbo_));
@@ -57,12 +55,12 @@ OccupancyGridTextureMap::OccupancyGridTextureMap(const float position_x,
   glBufferData(
     GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
   glEnableVertexAttribArray(0);
 
-  glVertexAttribPointer(
-    1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
-  glEnableVertexAttribArray(1);
+  // glVertexAttribPointer(
+  //   1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+  // glEnableVertexAttribArray(1);
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   // don't unbind ebo
@@ -75,12 +73,19 @@ OccupancyGridTextureMap::OccupancyGridTextureMap(const float position_x,
   model_ = glm::rotate(model_, orientation_z, glm::vec3(0.0f, 0.0f, 1.0f));
 }
 
+OccupancyGridTextureMap::~OccupancyGridTextureMap()
+{
+  glDeleteVertexArrays(1, &(this->vao_));
+  glDeleteBuffers(1, &(this->vbo_));
+  glDeleteBuffers(1, &(this->ebo_));
+}
+
 void
 OccupancyGridTextureMap::draw() const
 {
   glBindVertexArray(this->vao_);
   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-  glBindVertexArray(0);
+  // glBindVertexArray(0);
 }
 
 glm::mat4
