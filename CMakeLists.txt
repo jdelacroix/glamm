@@ -19,6 +19,8 @@ include_directories(
 add_executable(
   ${PROJECT_NAME}
   glamm/main.cpp
+  # library
+  glamm/frame_buffer.cpp
   glamm/occupancy_grid_texture_map.cpp
   glamm/shader_program.cpp
 )
@@ -35,15 +37,14 @@ target_link_libraries(
 
 set(
   GLAMM_SHADERS
-    mapping
-    merging
+    draw_map
+    blit_maps
+    render
 )
 
 foreach(SHADER IN LISTS GLAMM_SHADERS)
-
   configure_file(${CMAKE_CURRENT_SOURCE_DIR}/glamm/shaders/${SHADER}.vs ${CMAKE_CURRENT_BINARY_DIR}/shaders/${SHADER}.vs COPYONLY)
   configure_file(${CMAKE_CURRENT_SOURCE_DIR}/glamm/shaders/${SHADER}.fs ${CMAKE_CURRENT_BINARY_DIR}/shaders/${SHADER}.fs COPYONLY)
-
 endforeach()
 
 

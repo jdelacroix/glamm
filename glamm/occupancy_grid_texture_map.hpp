@@ -33,9 +33,12 @@ public:
                           const size_t width,
                           const size_t height);
 
+  void draw() const;
+  glm::mat4 model() const;
+
 private:
-  std::array<glm::vec4, 4> vertices_;
   glm::mat4 model_;
+  unsigned int vao_, vbo_, ebo_;
 };
 
 }

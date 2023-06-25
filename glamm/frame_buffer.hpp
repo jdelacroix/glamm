@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2023 Jean-Pierre de la Croix
  *
@@ -17,19 +16,17 @@
 
 #pragma once
 
-#include <string>
-
 namespace glamm {
 
-class ShaderProgram
+class FrameBuffer
 {
 public:
-  ShaderProgram(const std::string& vertex_shader_url,
-                const std::string& framgent_shader_url);
+  FrameBuffer(const unsigned int width, const unsigned int height);
 
-  unsigned int id() const;
+  void activate() const;
 
 private:
-  unsigned int id_;
+  unsigned int id_, texture_id_;
 };
+
 }

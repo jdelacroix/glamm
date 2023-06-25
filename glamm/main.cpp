@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "frame_buffer.hpp"
 #include "occupancy_grid_texture_map.hpp"
 #include "shader_program.hpp"
 
@@ -40,15 +41,8 @@ float _b = 0.0f;
 
 std::chrono::time_point<std::chrono::system_clock> _ts;
 
-float _vertices[] = { -50.0f, -50.0f, 0.0f, 50.0f,  -50.0f, 0.0f,
-                      50.0f,  50.0f,  0.0f, -50.0f, 50.0f,  0.0f };
-
-unsigned int _shader_program = 0;
-unsigned int _vao = 0, _vbo = 0;
-
-unsigned int _frame_buffers[2], _texture_buffers[2];
-
-unsigned int _height = 200, _width = 200;
+unsigned int _draw_map = 0;
+unsigned int _height = 800, _width = 800;
 
 void
 handle_key_event(unsigned char key, int x, int y)
@@ -65,32 +59,39 @@ handle_key_event(unsigned char key, int x, int y)
 void
 display()
 {
+  glViewport(0, 0, _width, _height);
+
+  glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // white bg
   glClear(GL_COLOR_BUFFER_BIT);
 
-  // glViewport(0, 0, 100, 100);
+  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-  // glBindFramebuffer(GL_FRAMEBUFFER, _frame_buffers[0]);
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  glUseProgram(_draw_map);
 
-  glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, _texture_buffers[0]);
+  glamm::OccupancyGridTextureMap map(0.0f, 0.0f, 0.0f, 50.0f, 100.0f);
 
-  glUseProgram(_shader_program);
-  glBindVertexArray(_vao);
-  glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-
-  glm::mat4 model(1.0f);
-  float c = glm::sqrt(2.0f * 100.0f * 100.0f);
-  model = glm::translate(model, glm::vec3(c, c, 0.0f));
-  model =
-    glm::rotate(model, glm::pi<float>() / 4.0f, glm::vec3(0.0f, 0.0f, 1.0f));
-
-  glUniformMatrix4fv(glGetUniformLocation(_shader_program, "model"),
+  glm::mat4 model = map.model();
+  glUniformMatrix4fv(glGetUniformLocation(_draw_map, "model"),
                      1,
                      GL_FALSE,
                      glm::value_ptr(model));
 
-  glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+  glm::mat4 view(1.0f);
+  view = glm::lookAt(glm::vec3(0.0f, 0.0f, 1.0f),
+                     glm::vec3(0.0f, 0.0f, 0.0f),
+                     glm::vec3(0.0f, 1.0f, 0.0f));
+  // view = glm::translate(view, glm::vec3(0.0f, 0.0f, 0.0f));
+
+  glUniformMatrix4fv(
+    glGetUniformLocation(_draw_map, "view"), 1, GL_FALSE, glm::value_ptr(view));
+
+  glm::mat4 proj =
+    glm::ortho(0.0f, (float)_width, 0.0f, (float)_height, 0.0f, 1.0f);
+
+  glUniformMatrix4fv(
+    glGetUniformLocation(_draw_map, "proj"), 1, GL_FALSE, glm::value_ptr(proj));
+
+  map.draw();
 
   glFlush();
 }
@@ -104,38 +105,13 @@ cycle_color()
   if (std::chrono::duration_cast<std::chrono::milliseconds>(ts - _ts) >=
       std::chrono::milliseconds(250)) {
 
-    GLint url = glGetUniformLocation(_shader_program, "input_color");
+    GLint url = glGetUniformLocation(_draw_map, "input_color");
 
     _r = fmod(_r + 0.1f, 1.0f);
     _g = fmod(_g + 0.1f, 1.0f);
     _b = fmod(_b + 0.1f, 1.0f);
 
     glUniform3f(url, _r, _g, _b);
-
-    glm::mat4 model(1.0f);
-    float c = glm::sqrt(2.0f * 50.0f * 50.0f);
-    model = glm::translate(model, glm::vec3(c, c, 0.0f));
-    model =
-      glm::rotate(model, glm::pi<float>() / 4.0f, glm::vec3(0.0f, 0.0f, 1.0f));
-
-    glm::mat4 view(1.0f);
-
-    glm::mat4 proj = glm::ortho(0.0f, 200.0f, 0.0f, 200.0f, 0.0f, 1.0f);
-
-    glUniformMatrix4fv(glGetUniformLocation(_shader_program, "model"),
-                       1,
-                       GL_FALSE,
-                       glm::value_ptr(model));
-
-    glUniformMatrix4fv(glGetUniformLocation(_shader_program, "view"),
-                       1,
-                       GL_FALSE,
-                       glm::value_ptr(view));
-
-    glUniformMatrix4fv(glGetUniformLocation(_shader_program, "proj"),
-                       1,
-                       GL_FALSE,
-                       glm::value_ptr(proj));
 
     _ts = ts;
 
@@ -146,11 +122,10 @@ cycle_color()
 int
 main(int argc, char** argv)
 {
-
   // initialize glut
   glutInit(&argc, argv);
 
-  glutInitWindowSize(200, 200);
+  glutInitWindowSize(_width, _height);
   glutCreateWindow("Hello, world!");
   glutKeyboardFunc(&handle_key_event);
   glutDisplayFunc(&display);
@@ -164,56 +139,10 @@ main(int argc, char** argv)
   }
 
   // read in vertex shader
-  glamm::ShaderProgram mapping("shaders/mapping.vs", "shaders/mapping.fs");
-  _shader_program = mapping.id();
-
-  // setup
-
-  glamm::OccupancyGridTextureMap map(
-    0.0, 0.0, 0.0, 100, 100); // remove before flight
+  glamm::ShaderProgram draw_map("shaders/draw_map.vs", "shaders/draw_map.fs");
+  _draw_map = draw_map.id();
 
   // create framebuffers
-
-  glGenFramebuffers(2, _frame_buffers);
-  glGenTextures(2, _texture_buffers);
-
-  for (size_t i = 0; i < 2; ++i) {
-    glBindFramebuffer(GL_FRAMEBUFFER, _frame_buffers[i]);
-    glBindTexture(GL_TEXTURE_2D, _texture_buffers[i]);
-    glTexImage2D(GL_TEXTURE_2D,
-                 0,
-                 GL_RGBA16F,
-                 _width,
-                 _height,
-                 0,
-                 GL_RGBA,
-                 GL_FLOAT,
-                 NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glFramebufferTexture2D(GL_FRAMEBUFFER,
-                           GL_COLOR_ATTACHMENT0,
-                           GL_TEXTURE_2D,
-                           _texture_buffers[i],
-                           0);
-  }
-
-  glGenVertexArrays(1, &_vao);
-  glGenBuffers(1, &_vbo);
-
-  glBindVertexArray(_vao);
-
-  glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(_vertices), _vertices, GL_STATIC_DRAW);
-
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-  glEnableVertexAttribArray(0);
-
-  glBindBuffer(GL_ARRAY_BUFFER, 0); // unbind vbo
-  glBindVertexArray(0);             // unbind vao
-
   _ts = std::chrono::system_clock::now();
   glutMainLoop();
 
