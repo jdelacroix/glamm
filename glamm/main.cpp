@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "draw_map_shader.hpp"
 #include "frame_buffer.hpp"
 #include "occupancy_grid_texture_map.hpp"
 #include "shader_program.hpp"
@@ -41,8 +42,9 @@ float _b = 0.0f;
 
 std::chrono::time_point<std::chrono::system_clock> _ts;
 
-unsigned int _draw_map = 0;
-unsigned int _width = 100, _height = 100;
+unsigned int _width = 200, _height = 200;
+
+std::unique_ptr<glamm::DrawMapShader> _draw_map_shader;
 
 void
 handle_key_event(unsigned char key, int x, int y)
@@ -67,33 +69,11 @@ display()
 
   glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-  const float c = glm::sqrt(2.0f * 25.0f * 25.0f);
-
+  // const float c = glm::sqrt(2.0f * 25.0f * 25.0f);
+  const float c = 0.0f;
   glamm::OccupancyGridTextureMap map(c, c, glm::pi<float>() / 4.0f, 50, 50);
 
-  glUseProgram(_draw_map);
-
-  glm::mat4 model = map.model();
-  glUniformMatrix4fv(glGetUniformLocation(_draw_map, "model"),
-                     1,
-                     GL_FALSE,
-                     glm::value_ptr(model));
-
-  glm::mat4 view(1.0f);
-  // view = glm::lookAt(glm::vec3(0.0f, 0.0f, 1.0f),
-  //                    glm::vec3(0.0f, 0.0f, 0.0f),
-  //                    glm::vec3(0.0f, 1.0f, 0.0f));
-
-  glUniformMatrix4fv(
-    glGetUniformLocation(_draw_map, "view"), 1, GL_FALSE, glm::value_ptr(view));
-
-  glm::mat4 proj =
-    glm::ortho(0.0f, (float)_width, 0.0f, (float)_height, 0.0f, 1.0f);
-
-  glUniformMatrix4fv(
-    glGetUniformLocation(_draw_map, "proj"), 1, GL_FALSE, glm::value_ptr(proj));
-
-  map.draw();
+  _draw_map_shader->draw(map);
 
   glFlush();
 }
@@ -107,7 +87,7 @@ cycle_color()
   if (std::chrono::duration_cast<std::chrono::milliseconds>(ts - _ts) >=
       std::chrono::milliseconds(250)) {
 
-    GLint url = glGetUniformLocation(_draw_map, "input_color");
+    GLint url = glGetUniformLocation(_draw_map_shader->id(), "input_color");
 
     _r = fmod(_r + 0.1f, 1.0f);
     _g = fmod(_g + 0.1f, 1.0f);
@@ -140,9 +120,7 @@ main(int argc, char** argv)
     return EXIT_FAILURE;
   }
 
-  // read in vertex shader
-  glamm::ShaderProgram draw_map("shaders/draw_map.vs", "shaders/draw_map.fs");
-  _draw_map = draw_map.id();
+  _draw_map_shader = std::make_unique<glamm::DrawMapShader>(_width, _height);
 
   // create framebuffers
   _ts = std::chrono::system_clock::now();

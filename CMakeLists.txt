@@ -20,6 +20,7 @@ add_executable(
   ${PROJECT_NAME}
   glamm/main.cpp
   # library
+  glamm/draw_map_shader.cpp
   glamm/frame_buffer.cpp
   glamm/occupancy_grid_texture_map.cpp
   glamm/shader_program.cpp

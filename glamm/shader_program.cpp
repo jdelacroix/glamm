@@ -24,8 +24,9 @@
 
 namespace glamm {
 
-ShaderProgram::ShaderProgram(const std::string& vertex_shader_url,
-                             const std::string& fragment_shader_url)
+unsigned int
+create_shader_program_from(const std::string& vertex_shader_url,
+                           const std::string& fragment_shader_url)
 {
 
   // read in vertex shader
@@ -80,14 +81,14 @@ ShaderProgram::ShaderProgram(const std::string& vertex_shader_url,
   }
 
   // create shader program
-  this->id_ = glCreateProgram();
-  glAttachShader(this->id_, v_shader);
-  glAttachShader(this->id_, f_shader);
-  glLinkProgram(this->id_);
+  unsigned int id = glCreateProgram();
+  glAttachShader(id, v_shader);
+  glAttachShader(id, f_shader);
+  glLinkProgram(id);
 
-  glGetProgramiv(this->id_, GL_LINK_STATUS, &glsuccess);
+  glGetProgramiv(id, GL_LINK_STATUS, &glsuccess);
   if (!glsuccess) {
-    glGetProgramInfoLog(this->id_, 512, nullptr, info_log);
+    glGetProgramInfoLog(id, 512, nullptr, info_log);
     std::cerr << "Shader program failed to link! " << info_log << std::endl;
     // return EXIT_FAILURE;
     glDeleteShader(v_shader);
@@ -98,12 +99,8 @@ ShaderProgram::ShaderProgram(const std::string& vertex_shader_url,
 
   glDeleteShader(v_shader);
   glDeleteShader(f_shader);
-}
 
-unsigned int
-ShaderProgram::id() const
-{
-  return this->id_;
+  return id;
 }
 
 }

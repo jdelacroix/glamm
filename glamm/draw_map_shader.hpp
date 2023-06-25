@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2023 Jean-Pierre de la Croix
  *
@@ -17,24 +16,24 @@
 
 #pragma once
 
-#include <string>
+#include "occupancy_grid_texture_map.hpp"
+
+#include <glm/glm.hpp>
 
 namespace glamm {
 
-// class ShaderProgram
-// {
-// public:
-//   ShaderProgram(const std::string& vertex_shader_url,
-//                 const std::string& framgent_shader_url);
+class DrawMapShader
+{
+public:
+  DrawMapShader(const size_t world_width, const size_t world_height);
 
-//   unsigned int id() const;
+  void draw(const glamm::OccupancyGridTextureMap& map) const;
 
-// private:
-//   unsigned int id_;
-// };
+  unsigned int id() const;
 
-unsigned int
-create_shader_program_from(const std::string& vertex_shader_url,
-                           const std::string& fragment_shader_url);
+private:
+  unsigned int shader_id_;
+  glm::mat4 view_, proj_;
+};
 
 }
