@@ -9,5 +9,6 @@ uniform sampler2D screen_texture;
 void
 main()
 {
-  fragment_color = texture(screen_texture, target_coordinates);
+  mediump vec3 color = texture(screen_texture, target_coordinates).rgb;
+  fragment_color = vec4(color, 1.0);
 }

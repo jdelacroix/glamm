@@ -25,6 +25,8 @@ public:
 
   void activate() const;
 
+  unsigned int texture_id() const;
+
 private:
   unsigned int id_, texture_id_;
 };

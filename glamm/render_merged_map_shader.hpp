@@ -18,13 +18,16 @@
 
 namespace glamm {
 
-class RenderMergedMap
+class RenderMergedMapShader
 {
 public:
-  RenderMergedMap();
+  RenderMergedMapShader();
+
+  void draw(const unsigned int tbo) const;
 
 private:
   unsigned int shader_id_;
+  unsigned int vao_, vbo_;
 };
 
 }

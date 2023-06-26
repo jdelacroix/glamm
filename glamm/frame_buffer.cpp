@@ -25,7 +25,7 @@ namespace glamm {
 FrameBuffer::FrameBuffer(const unsigned int width, const unsigned int height)
 {
   glGenFramebuffers(1, &(this->id_));
-  glGenTextures(1, &texture_id_);
+  glGenTextures(1, &(this->texture_id_));
 
   glBindFramebuffer(GL_FRAMEBUFFER, this->id_);
   glBindTexture(GL_TEXTURE_2D, this->texture_id_);
@@ -47,8 +47,14 @@ void
 FrameBuffer::activate() const
 {
   glBindFramebuffer(GL_FRAMEBUFFER, this->id_);
-  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+  glClearColor(0.31f, 0.78f, 0.47f, 1.0f); // emerald green
   glClear(GL_COLOR_BUFFER_BIT);
+}
+
+unsigned int
+FrameBuffer::texture_id() const
+{
+  return this->texture_id_;
 }
 
 }

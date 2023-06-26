@@ -17,6 +17,7 @@
 #include "draw_map_shader.hpp"
 #include "frame_buffer.hpp"
 #include "occupancy_grid_texture_map.hpp"
+#include "render_merged_map_shader.hpp"
 #include "shader_program.hpp"
 
 #include <GL/glew.h>
@@ -45,6 +46,9 @@ std::chrono::time_point<std::chrono::system_clock> _ts;
 unsigned int _width = 200, _height = 200;
 
 std::unique_ptr<glamm::DrawMapShader> _draw_map_shader;
+std::unique_ptr<glamm::RenderMergedMapShader> _render_merged_map_shader;
+
+std::unique_ptr<glamm::FrameBuffer> _front_frame_buffer;
 
 void
 handle_key_event(unsigned char key, int x, int y)
@@ -63,17 +67,21 @@ display()
 {
 
   glViewport(0, 0, _width, _height);
-
-  glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // white bg
-  glClear(GL_COLOR_BUFFER_BIT);
-
   glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+  _front_frame_buffer->activate();
 
   // const float c = glm::sqrt(2.0f * 25.0f * 25.0f);
   const float c = 0.0f;
   glamm::OccupancyGridTextureMap map(c, c, glm::pi<float>() / 4.0f, 50, 50);
 
   _draw_map_shader->draw(map);
+
+  glBindBuffer(GL_FRAMEBUFFER, 0);
+  glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+  glClear(GL_COLOR_BUFFER_BIT);
+
+  _render_merged_map_shader->draw(_front_frame_buffer->texture_id());
 
   glFlush();
 }
@@ -121,6 +129,9 @@ main(int argc, char** argv)
   }
 
   _draw_map_shader = std::make_unique<glamm::DrawMapShader>(_width, _height);
+  _render_merged_map_shader = std::make_unique<glamm::RenderMergedMapShader>();
+
+  _front_frame_buffer = std::make_unique<glamm::FrameBuffer>(_width, _height);
 
   // create framebuffers
   _ts = std::chrono::system_clock::now();
