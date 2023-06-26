@@ -18,8 +18,6 @@ OpenGL Accelerated Map Merging (GLAMM)
 
 ## What do the shaders do?
 
-Each shader program has two corresponding shaders: the vertex shader (`.vs`) and the fragment shader (`.fs`).
-
-1. `draw_map.{vs,fs}` draws a new map.
-2. `blit_maps.{vs,fs}` merges the newest map with the merged maps.
-3. `render.{vs,fs}` draw the merged map to the screen.
+1. `DrawMapShader` draws a new map to a buffer.
+2. `BlitMapsShader` merges the newest map with the previously merged maps.
+3. `RenderMergedMapShader` draw the merged map to the screen.

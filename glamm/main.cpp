@@ -36,9 +36,9 @@
 #include <cmath>
 #include <cstdlib>
 
-float _r = 1.0f;
-float _g = 0.5f;
-float _b = 0.0f;
+float _r = 0.31f;
+float _g = 0.78f;
+float _b = 0.47f;
 
 std::chrono::time_point<std::chrono::system_clock> _ts;
 

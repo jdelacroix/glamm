@@ -23,6 +23,7 @@ add_executable(
   glamm/draw_map_shader.cpp
   glamm/frame_buffer.cpp
   glamm/occupancy_grid_texture_map.cpp
+  glamm/render_merged_map_shader.cpp
   glamm/shader_program.cpp
 )
 
@@ -40,7 +41,7 @@ set(
   GLAMM_SHADERS
     draw_map
     blit_maps
-    render
+    render_merged_map
 )
 
 foreach(SHADER IN LISTS GLAMM_SHADERS)
