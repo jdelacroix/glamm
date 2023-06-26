@@ -27,7 +27,7 @@ public:
 
 private:
   unsigned int shader_id_;
-  unsigned int vao_, vbo_;
+  unsigned int vao_, vbo_, ebo_;
 };
 
 }

@@ -10,5 +10,6 @@ void
 main()
 {
   mediump vec3 color = texture(screen_texture, target_coordinates).rgb;
+  // mediump vec3 color = vec3(0.31, 0.78, 0.47);
   fragment_color = vec4(color, 1.0);
 }

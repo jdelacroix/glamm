@@ -85,7 +85,7 @@ OccupancyGridTextureMap::draw() const
 {
   glBindVertexArray(this->vao_);
   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-  glBindVertexArray(0);
+  // glBindVertexArray(0);
 }
 
 glm::mat4

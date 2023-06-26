@@ -29,30 +29,36 @@ RenderMergedMapShader::RenderMergedMapShader()
   this->shader_id_ = glamm::create_shader_program_from(
     "shaders/render_merged_map.vs", "shaders/render_merged_map.fs");
 
-  float vertices[] = { -1.0f, 1.0f,  0.0f, 1.0f, //
+  float vertices[] = { 1.0f,  1.0f,  1.0f, 1.0f, //
+                       1.0f,  -1.0f, 1.0f, 0.0f, //
                        -1.0f, -1.0f, 0.0f, 0.0f, //
-                       1.0f,  -1.0f, 1.0f, 0.0f, //
+                       -1.0f, 1.0f,  0.0f, 1.0f };
 
-                       -1.0f, 1.0f,  0.0f, 1.0f, //
-                       1.0f,  -1.0f, 1.0f, 0.0f, //
-                       1.0f,  1.0f,  1.0f, 1.0f };
+  unsigned int indices[] = { 0, 1, 3, //
+                             1, 2, 3 };
 
   glGenVertexArrays(1, &(this->vao_));
   glGenBuffers(1, &(this->vbo_));
+  glGenBuffers(1, &(this->ebo_));
 
   glBindVertexArray(this->vao_);
 
   glBindBuffer(GL_ARRAY_BUFFER, this->vbo_);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-  glEnableVertexAttribArray(0);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->ebo_);
+  glBufferData(
+    GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
+  glEnableVertexAttribArray(0);
+  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+
+  glEnableVertexAttribArray(1);
   glVertexAttribPointer(
     1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
-  glEnableVertexAttribArray(1);
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
+  // don't unbind ebo
   glBindVertexArray(0);
 }
 
@@ -60,10 +66,15 @@ void
 RenderMergedMapShader::draw(const unsigned int tbo) const
 {
   glUseProgram(this->shader_id_);
-  glBindVertexArray(this->vao_);
+  glUniform1i(glGetUniformLocation(this->shader_id_, "screen_texture"), 0);
+
   std::cout << "Rendering framebuffer texture (" << tbo << ")" << std::endl;
+  glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, tbo);
-  glDrawArrays(GL_TRIANGLES, 0, 6);
+
+  glBindVertexArray(this->vao_);
+  glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+  glBindVertexArray(0);
 }
 
 }

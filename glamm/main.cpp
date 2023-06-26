@@ -67,17 +67,16 @@ display()
 {
 
   glViewport(0, 0, _width, _height);
-  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+  // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
   _front_frame_buffer->activate();
 
   // const float c = glm::sqrt(2.0f * 25.0f * 25.0f);
   const float c = 0.0f;
   glamm::OccupancyGridTextureMap map(c, c, glm::pi<float>() / 4.0f, 50, 50);
-
   _draw_map_shader->draw(map);
 
-  glBindBuffer(GL_FRAMEBUFFER, 0);
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
   glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
 
