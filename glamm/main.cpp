@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "blit_maps_shader.hpp"
 #include "draw_map_shader.hpp"
 #include "frame_buffer.hpp"
 #include "occupancy_grid_texture_map.hpp"
@@ -31,6 +32,7 @@
 #include <fstream>
 #include <iostream>
 #include <memory>
+#include <random>
 #include <sstream>
 #include <string>
 
@@ -46,9 +48,16 @@ std::chrono::time_point<std::chrono::system_clock> _ts;
 unsigned int _width = 200, _height = 200;
 
 std::unique_ptr<glamm::DrawMapShader> _draw_map_shader;
+std::unique_ptr<glamm::BlitMapsShader> _blit_maps_shader;
 std::unique_ptr<glamm::RenderMergedMapShader> _render_merged_map_shader;
 
-std::unique_ptr<glamm::FrameBuffer> _front_frame_buffer;
+std::unique_ptr<glamm::FrameBuffer> _front_frame_buffer, _back_frame_buffer;
+
+std::random_device _rd;
+std::mt19937 _gen(_rd());
+std::uniform_real_distribution<float> _distrib(0.0f,
+                                               static_cast<float>(_width) /
+                                                 2.0f);
 
 void
 handle_key_event(unsigned char key, int x, int y)
@@ -70,17 +79,38 @@ display()
   // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
   _front_frame_buffer->activate();
-
-  // const float c = glm::sqrt(2.0f * 25.0f * 25.0f);
-  const float c = 0.0f;
-  glamm::OccupancyGridTextureMap map(c, c, glm::pi<float>() / 4.0f, 50, 50);
-  _draw_map_shader->draw(map);
-
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
-  glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+  glClearColor(0.5f, 0.5f, 0.5f, 0.0f); // gray
   glClear(GL_COLOR_BUFFER_BIT);
 
-  _render_merged_map_shader->draw(_front_frame_buffer->texture_id());
+  _back_frame_buffer->activate();
+  glClear(GL_COLOR_BUFFER_BIT);
+
+  // glUniform3f(glGetUniformLocation(_draw_map_shader->id(), "input_color"),
+  //             1.00f,
+  //             0.46f,
+  //             0.09f);
+
+  for (size_t i = 0; i < 5; ++i) {
+
+    _front_frame_buffer->activate();
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    // const float c = _distrib(_gen);
+    const float c = 0.0f + (10.0f * i);
+    glamm::OccupancyGridTextureMap map(c, c, glm::pi<float>() / 4.0f, 50, 50);
+
+    _draw_map_shader->draw(map);
+
+    _back_frame_buffer->activate();
+    _blit_maps_shader->draw(_front_frame_buffer->texture_id(),
+                            _back_frame_buffer->texture_id());
+  }
+
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  glClear(GL_COLOR_BUFFER_BIT);
+
+  // _render_merged_map_shader->draw(_front_frame_buffer->texture_id());
+  _render_merged_map_shader->draw(_back_frame_buffer->texture_id());
 
   glFlush();
 }
@@ -92,15 +122,15 @@ cycle_color()
   auto ts = std::chrono::system_clock::now();
 
   if (std::chrono::duration_cast<std::chrono::milliseconds>(ts - _ts) >=
-      std::chrono::milliseconds(250)) {
+      std::chrono::milliseconds(1000)) {
 
-    GLint url = glGetUniformLocation(_draw_map_shader->id(), "input_color");
+    // GLint url = glGetUniformLocation(_draw_map_shader->id(), "input_color");
 
-    _r = fmod(_r + 0.1f, 1.0f);
-    _g = fmod(_g + 0.1f, 1.0f);
-    _b = fmod(_b + 0.1f, 1.0f);
+    // _r = fmod(_r + 0.1f, 1.0f);
+    // _g = fmod(_g + 0.1f, 1.0f);
+    // _b = fmod(_b + 0.1f, 1.0f);
 
-    glUniform3f(url, _r, _g, _b);
+    // glUniform3f(url, _r, _g, _b);
 
     _ts = ts;
 
@@ -128,9 +158,11 @@ main(int argc, char** argv)
   }
 
   _draw_map_shader = std::make_unique<glamm::DrawMapShader>(_width, _height);
+  _blit_maps_shader = std::make_unique<glamm::BlitMapsShader>();
   _render_merged_map_shader = std::make_unique<glamm::RenderMergedMapShader>();
 
   _front_frame_buffer = std::make_unique<glamm::FrameBuffer>(_width, _height);
+  _back_frame_buffer = std::make_unique<glamm::FrameBuffer>(_width, _height);
 
   // create framebuffers
   _ts = std::chrono::system_clock::now();

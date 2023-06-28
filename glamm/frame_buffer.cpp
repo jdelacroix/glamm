@@ -52,8 +52,10 @@ void
 FrameBuffer::activate() const
 {
   glBindFramebuffer(GL_FRAMEBUFFER, this->id_);
-  glClearColor(0.31f, 0.78f, 0.47f, 1.0f); // emerald green
-  glClear(GL_COLOR_BUFFER_BIT);
+  // glClearColor(0.31f, 0.78f, 0.47f, 1.0f); // emerald green
+  // glClear(GL_COLOR_BUFFER_BIT);
+  // glActiveTexture(GL_TEXTURE0);
+  // glBindTexture(GL_TEXTURE_2D, this->texture_id_);
 }
 
 unsigned int
