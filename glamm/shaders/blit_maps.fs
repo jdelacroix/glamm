@@ -11,8 +11,7 @@ void
 main()
 {
   mediump vec4 map_color = texture(input_texture, target_coordinates);
-  // mediump vec4 merged_map_color = texture(output_texture,
-  // target_coordinates);
+  mediump vec4 merged_map_color = texture(output_texture, target_coordinates);
 
   // if (map_color.a == 1.0) {
   //   if (merged_map_color.a == 1.0) {
@@ -22,10 +21,10 @@ main()
   //   }
   // }
 
-  // if (map_color.r != 0.5) {
-  //   // fragment_color = vec4(0.0, 0.48, 0.65, 1.0);
-  fragment_color = vec4(texture(input_texture, target_coordinates).rgb, 1.0);
-  // } else {
-  //   fragment_color = vec4(0.5, 0.5, 0.5, 1.0);
-  // }
+  if (map_color.r != 0.5) {
+    //   // fragment_color = vec4(0.0, 0.48, 0.65, 1.0);
+    fragment_color = vec4(map_color.rgb, 1.0);
+  } else {
+    fragment_color = vec4(merged_map_color.rgb, 1.0);
+  }
 }
