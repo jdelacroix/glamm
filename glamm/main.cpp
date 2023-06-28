@@ -56,8 +56,7 @@ std::unique_ptr<glamm::FrameBuffer> _front_frame_buffer, _back_frame_buffer;
 std::random_device _rd;
 std::mt19937 _gen(_rd());
 std::uniform_real_distribution<float> _distrib(0.0f,
-                                               static_cast<float>(_width) /
-                                                 2.0f);
+                                               static_cast<float>(_width));
 
 void
 handle_key_event(unsigned char key, int x, int y)
@@ -90,14 +89,16 @@ display()
   //             0.46f,
   //             0.09f);
 
-  for (size_t i = 0; i < 5; ++i) {
+  for (size_t i = 0; i < 10; ++i) {
 
     _front_frame_buffer->activate();
     glClear(GL_COLOR_BUFFER_BIT);
 
     // const float c = _distrib(_gen);
-    const float c = 0.0f + (10.0f * i);
-    glamm::OccupancyGridTextureMap map(c, c, glm::pi<float>() / 4.0f, 50, 50);
+    // const float c = 0.0f + (10.0f * i);
+    const float c_x = 100.0f - _distrib(_gen), c_y = 100.0f - _distrib(_gen);
+    glamm::OccupancyGridTextureMap map(
+      c_x, c_y, glm::pi<float>() / 4.0f, 50, 50);
 
     _draw_map_shader->draw(map);
 
@@ -122,7 +123,7 @@ cycle_color()
   auto ts = std::chrono::system_clock::now();
 
   if (std::chrono::duration_cast<std::chrono::milliseconds>(ts - _ts) >=
-      std::chrono::milliseconds(1000)) {
+      std::chrono::milliseconds(2000)) {
 
     // GLint url = glGetUniformLocation(_draw_map_shader->id(), "input_color");
 
