@@ -24,6 +24,7 @@ add_executable(
   glamm/draw_map_shader.cpp
   glamm/frame_buffer.cpp
   glamm/occupancy_grid_texture_map.cpp
+  glamm/pgm_io.cpp
   glamm/render_merged_map_shader.cpp
   glamm/shader_program.cpp
 )
@@ -50,4 +51,4 @@ foreach(SHADER IN LISTS GLAMM_SHADERS)
   configure_file(${CMAKE_CURRENT_SOURCE_DIR}/glamm/shaders/${SHADER}.fs ${CMAKE_CURRENT_BINARY_DIR}/shaders/${SHADER}.fs COPYONLY)
 endforeach()
 
-
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/maps/example_map.pgm ${CMAKE_CURRENT_BINARY_DIR}/maps/example_map.pgm)

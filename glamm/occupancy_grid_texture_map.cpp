@@ -33,10 +33,10 @@ OccupancyGridTextureMap::OccupancyGridTextureMap(const float position_x,
   // position is location at center of map
 
   float vertices[] = {
-    width / 2.0f,  height / 2.0f,  0.0f, // 1.0f, 1.0f, // top right
-    width / 2.0f,  -height / 2.0f, 0.0f, // 1.0f, 0.0f, // bottom right
-    -width / 2.0f, -height / 2.0f, 0.0f, // 0.0f, 0.0f, // bottom left
-    -width / 2.0f, height / 2.0f,  0.0f  // 0.0f, 1.0f, // top left
+    width / 2.0f,  height / 2.0f,  0.0f, 1.0f, 1.0f, // top right
+    width / 2.0f,  -height / 2.0f, 0.0f, 1.0f, 0.0f, // bottom right
+    -width / 2.0f, -height / 2.0f, 0.0f, 0.0f, 0.0f, // bottom left
+    -width / 2.0f, height / 2.0f,  0.0f, 0.0f, 1.0f, // top left
   };
 
   unsigned int indices[] = { 0, 1, 3, //
@@ -55,12 +55,12 @@ OccupancyGridTextureMap::OccupancyGridTextureMap(const float position_x,
   glBufferData(
     GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
   glEnableVertexAttribArray(0);
 
-  // glVertexAttribPointer(
-  //   1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
-  // glEnableVertexAttribArray(1);
+  glVertexAttribPointer(
+    1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+  glEnableVertexAttribArray(1);
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   // don't unbind ebo

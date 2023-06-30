@@ -40,7 +40,8 @@ DrawMapShader::DrawMapShader(const size_t world_width,
 }
 
 void
-DrawMapShader::draw(const glamm::OccupancyGridTextureMap& map) const
+DrawMapShader::draw(const glamm::OccupancyGridTextureMap& map,
+                    const unsigned int texture_id) const
 {
 
   glUseProgram(this->shader_id_);
@@ -60,6 +61,11 @@ DrawMapShader::draw(const glamm::OccupancyGridTextureMap& map) const
                      1,
                      GL_FALSE,
                      glm::value_ptr(this->proj_));
+
+  glUniform1i(glGetUniformLocation(this->shader_id_, "map_texture"), 0);
+
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, texture_id);
 
   map.draw();
 }

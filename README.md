@@ -10,11 +10,10 @@ OpenGL Accelerated Map Merging (GLAMM)
 
 ## How should it work?
 
-0. Maps (textures) are merged sequentially by ping-pong rendering between two framebuffers.
+0. Maps (textures) are merged sequentially to two framebuffer.
 1. The first framebuffer is an empty map (transparent texture) from which the shader will read and combine with a new piece of the map (a rectangle with a bound texture loaded from a PGM) to render to the second framebuffer.
-2. Swap framebuffers and repeat until all maps have been merged.
-3. The last-to-be-written framebuffer contains the merged map and can be written to the filesystem as a PGM. 
-4. (Optional) Display the merged map on the screen.
+2. The last-to-be-written framebuffer contains the merged map and can be written to the filesystem as a PGM. 
+3. (Optional) Display the merged map on the screen.
 
 ## What do the shaders do?
 

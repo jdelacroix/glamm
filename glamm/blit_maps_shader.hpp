@@ -16,25 +16,19 @@
 
 #pragma once
 
-#include "occupancy_grid_texture_map.hpp"
-
-#include <glm/glm.hpp>
-
 namespace glamm {
 
-class DrawMapShader
+class BlitMapsShader
 {
 public:
-  DrawMapShader(const size_t world_width, const size_t world_height);
+  BlitMapsShader();
 
-  void draw(const glamm::OccupancyGridTextureMap& map,
-            const unsigned int texture_id) const;
-
-  unsigned int id() const;
+  void draw(const unsigned int map_texture,
+            const unsigned int merged_map_texture) const;
 
 private:
   unsigned int shader_id_;
-  glm::mat4 view_, proj_;
+  unsigned int vao_, vbo_, ebo_;
 };
 
 }
