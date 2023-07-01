@@ -13,19 +13,11 @@ main()
   mediump vec4 map_color = texture(input_texture, target_coordinates);
   mediump vec4 merged_map_color = texture(output_texture, target_coordinates);
 
+  fragment_color = merged_map_color;
+
   if (map_color.r != 0.5) {
-    //   // fragment_color = vec4(0.0, 0.48, 0.65, 1.0);
-    if (merged_map_color.r == 0.5) {
-      fragment_color = vec4(map_color.rgb, 1.0);
-    } else {
-      // fragment_color = vec4(0.31, 0.78, 0.47, 1.0); // emerald greend
-      if (map_color.r == 0.0) {
-        fragment_color = map_color;
-      } else {
-        fragment_color = merged_map_color;
-      }
+    if (map_color.r == 0.0 || merged_map_color.r == 0.5) {
+      fragment_color = map_color;
     }
-  } else {
-    fragment_color = vec4(merged_map_color.rgb, 1.0);
   }
 }

@@ -46,7 +46,7 @@ float _b = 0.47f;
 
 std::chrono::time_point<std::chrono::system_clock> _ts;
 
-unsigned int _width = 200, _height = 200;
+unsigned int _width = 1000, _height = 1000;
 
 std::unique_ptr<glamm::DrawMapShader> _draw_map_shader;
 std::unique_ptr<glamm::BlitMapsShader> _blit_maps_shader;
@@ -99,14 +99,14 @@ display()
   //             0.46f,
   //             0.09f);
 
-  for (size_t i = 0; i < 10; ++i) {
+  for (size_t i = 0; i < 10000; ++i) {
 
     _front_frame_buffer->activate();
     glClear(GL_COLOR_BUFFER_BIT);
 
     // const float c_x = 0.0f, c_y = 0.0f;
-    const float c_x = 100.0f - _distrib(_gen), c_y = 100.0f - _distrib(_gen);
-    glamm::OccupancyGridTextureMap map(c_x, c_y, _distrib_yaw(_gen), 50, 50);
+    const float c_x = 500.0f - _distrib(_gen), c_y = 500.0f - _distrib(_gen);
+    glamm::OccupancyGridTextureMap map(c_x, c_y, _distrib_yaw(_gen), 100, 100);
 
     _draw_map_shader->draw(map, _map_texture_id);
 
@@ -118,10 +118,17 @@ display()
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
   glClear(GL_COLOR_BUFFER_BIT);
 
+  std::cout << "benchmark: "
+            << std::chrono::duration_cast<std::chrono::milliseconds>(
+                 std::chrono::system_clock::now() - ts)
+                 .count()
+            << "ms" << std::endl;
+
+  ts = std::chrono::system_clock::now();
   // _render_merged_map_shader->draw(_front_frame_buffer->texture_id());
   _render_merged_map_shader->draw(_back_frame_buffer->texture_id());
 
-  std::cout << "benchmark: "
+  std::cout << "render time: "
             << std::chrono::duration_cast<std::chrono::milliseconds>(
                  std::chrono::system_clock::now() - ts)
                  .count()
@@ -137,7 +144,7 @@ cycle_color()
   auto ts = std::chrono::system_clock::now();
 
   if (std::chrono::duration_cast<std::chrono::milliseconds>(ts - _ts) >=
-      std::chrono::milliseconds(2000)) {
+      std::chrono::milliseconds(40)) {
 
     // GLint url = glGetUniformLocation(_draw_map_shader->id(),
     // "input_color");
@@ -147,6 +154,8 @@ cycle_color()
     // _b = fmod(_b + 0.1f, 1.0f);
 
     // glUniform3f(url, _r, _g, _b);
+
+    std::cin.ignore();
 
     _ts = ts;
 
@@ -197,8 +206,8 @@ main(int argc, char** argv)
   glTexImage2D(GL_TEXTURE_2D,
                0,
                GL_RGBA,
-               2,
-               2,
+               8,
+               8,
                0,
                GL_RGB,
                GL_FLOAT,
