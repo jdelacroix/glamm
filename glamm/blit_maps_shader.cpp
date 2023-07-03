@@ -19,65 +19,67 @@
 #include "shader_program.hpp"
 
 #include <GL/glew.h>
-
-#include <iostream>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 namespace glamm {
 
-BlitMapsShader::BlitMapsShader()
+BlitMapsShader::BlitMapsShader(const size_t world_width,
+                               const size_t world_height)
+  : view_(1.0f)
 {
   this->shader_id_ = glamm::create_shader_program_from("shaders/blit_maps.vs",
                                                        "shaders/blit_maps.fs");
 
-  float vertices[] = { 1.0f,  1.0f,  1.0f, 1.0f, //
-                       1.0f,  -1.0f, 1.0f, 0.0f, //
-                       -1.0f, -1.0f, 0.0f, 0.0f, //
-                       -1.0f, 1.0f,  0.0f, 1.0f };
+  float left = -static_cast<float>(world_width) / 2.0f;
+  float right = static_cast<float>(world_width) / 2.0f;
+  float bottom = -static_cast<float>(world_height) / 2.0f;
+  float top = static_cast<float>(world_height) / 2.0f;
 
-  unsigned int indices[] = { 0, 1, 3, //
-                             1, 2, 3 };
-
-  glGenVertexArrays(1, &(this->vao_));
-  glGenBuffers(1, &(this->vbo_));
-  glGenBuffers(1, &(this->ebo_));
-
-  glBindVertexArray(this->vao_);
-
-  glBindBuffer(GL_ARRAY_BUFFER, this->vbo_);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->ebo_);
-  glBufferData(
-    GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-  glEnableVertexAttribArray(0);
-  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-
-  glEnableVertexAttribArray(1);
-  glVertexAttribPointer(
-    1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
-
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-  // don't unbind ebo
-  glBindVertexArray(0);
+  this->proj_ = glm::ortho(left, right, bottom, top, 0.0f, 1.0f);
 }
 
 void
-BlitMapsShader::draw(const unsigned int map_texture,
-                     const unsigned int merged_map_texture) const
+BlitMapsShader::draw(const glamm::OccupancyGridTextureMap& map,
+                     const unsigned int texture_id,
+                     const unsigned int global_texture_id) const
 {
+
   glUseProgram(this->shader_id_);
+
+  glm::mat4 model = map.model();
+  glUniformMatrix4fv(glGetUniformLocation(this->shader_id_, "model"),
+                     1,
+                     GL_FALSE,
+                     glm::value_ptr(model));
+
+  glUniformMatrix4fv(glGetUniformLocation(this->shader_id_, "view"),
+                     1,
+                     GL_FALSE,
+                     glm::value_ptr(this->view_));
+
+  glUniformMatrix4fv(glGetUniformLocation(this->shader_id_, "proj"),
+                     1,
+                     GL_FALSE,
+                     glm::value_ptr(this->proj_));
+
+  glUniform1i(glGetUniformLocation(this->shader_id_, "map_texture"), 0);
+
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, texture_id);
+  glActiveTexture(GL_TEXTURE1);
+  glBindTexture(GL_TEXTURE_2D, global_texture_id);
+
   glUniform1i(glGetUniformLocation(this->shader_id_, "input_texture"), 0);
   glUniform1i(glGetUniformLocation(this->shader_id_, "output_texture"), 1);
 
-  glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, map_texture);
-  glActiveTexture(GL_TEXTURE1);
-  glBindTexture(GL_TEXTURE_2D, merged_map_texture);
+  map.draw();
+}
 
-  glBindVertexArray(this->vao_);
-  glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-  glBindVertexArray(0);
+unsigned int
+BlitMapsShader::id() const
+{
+  return this->shader_id_;
 }
 
 }
