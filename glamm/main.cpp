@@ -52,7 +52,7 @@ std::unique_ptr<glamm::RenderMergedMapShader> _render_merged_map_shader;
 
 std::unique_ptr<glamm::FrameBuffer> _front_frame_buffer, _back_frame_buffer;
 
-GLfloat _map_texture_buffer[512];
+GLfloat _map_texture_buffer[1048576];
 unsigned int _map_texture_id;
 
 std::random_device _rd;
@@ -160,29 +160,40 @@ main(int argc, char** argv)
   _front_frame_buffer = std::make_unique<glamm::FrameBuffer>(_width, _height);
 
   glamm::load_map_from_pgm(
-    "maps/example_map.pgm", &_map_texture_buffer[0], 512);
+    "maps/example_map.pgm", &_map_texture_buffer[0], 1048576);
 
   // for (size_t i = 0; i < 512; ++i) {
   //   _map_texture_buffer[i] = 1.0f;
   // }
 
-  glGenTextures(1, &_map_texture_id);
-  glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, _map_texture_id);
-  // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  glTexImage2D(GL_TEXTURE_2D,
-               0,
-               GL_RGBA,
-               8,
-               8,
-               0,
-               GL_RGB,
-               GL_FLOAT,
-               &_map_texture_buffer[0]);
-  glGenerateMipmap(GL_TEXTURE_2D);
+  auto ts = std::chrono::system_clock::now();
+
+  for (size_t i = 0; i < 10000; ++i) {
+
+    glGenTextures(1, &_map_texture_id);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, _map_texture_id);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D,
+                 0,
+                 GL_RGBA,
+                 8,
+                 8,
+                 0,
+                 GL_RGB,
+                 GL_FLOAT,
+                 &_map_texture_buffer[0]);
+    glGenerateMipmap(GL_TEXTURE_2D);
+  }
+
+  std::cout << "texture load time: "
+            << std::chrono::duration_cast<std::chrono::milliseconds>(
+                 std::chrono::system_clock::now() - ts)
+                 .count()
+            << "ms" << std::endl;
 
   // create framebuffers
   _ts = std::chrono::system_clock::now();

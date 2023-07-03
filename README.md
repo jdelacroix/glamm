@@ -8,12 +8,12 @@ OpenGL Accelerated Map Merging (GLAMM)
 - `libglm-dev` for math
 - OpenGL 3.2 ES
 
-## How should it work?
+## How does it work?
 
-0. Maps (textures) are merged sequentially to two framebuffer.
-1. The first framebuffer is an empty map (transparent texture) from which the shader will read and combine with a new piece of the map (a rectangle with a bound texture loaded from a PGM) to render to the second framebuffer.
-2. The last-to-be-written framebuffer contains the merged map and can be written to the filesystem as a PGM. 
-3. (Optional) Display the merged map on the screen.
+0. Maps (textures) are merged sequentially to a framebuffer.
+1. Vertex shader computes screen coordinates from map properties (location, orientation, world size).
+2. Fragment shader merges map with previously merged maps in the framebuffer via the implemented merge policy.
+3. (Optional) Merged map in the framebuffer can be rendered to screen. 
 
 ## What do the shaders do?
 
