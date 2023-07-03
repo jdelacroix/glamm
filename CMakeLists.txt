@@ -21,7 +21,6 @@ add_executable(
   glamm/main.cpp
   # library
   glamm/blit_maps_shader.cpp
-  glamm/draw_map_shader.cpp
   glamm/frame_buffer.cpp
   glamm/occupancy_grid_texture_map.cpp
   glamm/pgm_io.cpp
@@ -41,7 +40,6 @@ target_link_libraries(
 
 set(
   GLAMM_SHADERS
-    draw_map
     blit_maps
     render_merged_map
 )
