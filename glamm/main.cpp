@@ -91,28 +91,12 @@ display()
   glClearColor(0.5f, 0.5f, 0.5f, 0.0f); // gray
   glClear(GL_COLOR_BUFFER_BIT);
 
-  _back_frame_buffer->activate();
-  glClear(GL_COLOR_BUFFER_BIT);
-
-  // glUniform3f(glGetUniformLocation(_draw_map_shader->id(), "input_color"),
-  //             1.00f,
-  //             0.46f,
-  //             0.09f);
-
-  for (size_t i = 0; i < 10000; ++i) {
-
-    _front_frame_buffer->activate();
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    // const float c_x = 0.0f, c_y = 0.0f;
+  for (size_t i = 0; i < 100; ++i) {
     const float c_x = 500.0f - _distrib(_gen), c_y = 500.0f - _distrib(_gen);
     glamm::OccupancyGridTextureMap map(c_x, c_y, _distrib_yaw(_gen), 100, 100);
 
-    _draw_map_shader->draw(map, _map_texture_id);
-
-    _back_frame_buffer->activate();
-    _blit_maps_shader->draw(_front_frame_buffer->texture_id(),
-                            _back_frame_buffer->texture_id());
+    _draw_map_shader->draw(
+      map, _map_texture_id, _front_frame_buffer->texture_id());
   }
 
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -125,8 +109,7 @@ display()
             << "ms" << std::endl;
 
   ts = std::chrono::system_clock::now();
-  // _render_merged_map_shader->draw(_front_frame_buffer->texture_id());
-  _render_merged_map_shader->draw(_back_frame_buffer->texture_id());
+  _render_merged_map_shader->draw(_front_frame_buffer->texture_id());
 
   std::cout << "render time: "
             << std::chrono::duration_cast<std::chrono::milliseconds>(

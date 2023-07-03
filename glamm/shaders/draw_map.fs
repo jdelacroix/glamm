@@ -1,15 +1,24 @@
 #version 320 es
 
-uniform mediump vec3 input_color;
+in mediump vec2 input_position;
+in mediump vec2 output_position;
 
-in mediump vec2 target_coordinates;
-
-out mediump vec4 frag_color;
+out mediump vec4 fragment_color;
 
 uniform sampler2D input_texture;
+uniform sampler2D output_texture;
 
 void
 main()
 {
-  frag_color = vec4(texture(input_texture, target_coordinates).rgb, 1.0);
+  mediump vec4 map_color = texture(input_texture, input_position);
+  mediump vec4 merged_map_color = texture(output_texture, output_position);
+
+  fragment_color = merged_map_color;
+
+  if (map_color.r != 0.5) {
+    if (map_color.r == 0.0 || merged_map_color.r == 0.5) {
+      fragment_color = map_color;
+    }
+  }
 }
