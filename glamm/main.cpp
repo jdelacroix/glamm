@@ -81,10 +81,8 @@ display()
   auto ts = std::chrono::system_clock::now();
 
   glViewport(0, 0, _width, _height);
-  // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
   _front_frame_buffer->activate();
-  // glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
   glClearColor(0.5f, 0.5f, 0.5f, 0.0f); // gray
   glClear(GL_COLOR_BUFFER_BIT);
@@ -115,6 +113,26 @@ display()
                  .count()
             << "ms" << std::endl;
 
+  ts = std::chrono::system_clock::now();
+
+  GLubyte output_buffer[_width * _height];
+
+  glGetTextureImage(_front_frame_buffer->texture_id(),
+                    0,
+                    GL_RED,
+                    GL_UNSIGNED_BYTE,
+                    _width * _height,
+                    &output_buffer[0]);
+
+  glamm::save_map_to_pgm(
+    "output.pgm", _width, _height, &output_buffer[0], _width * _height);
+
+  std::cout << "save time: "
+            << std::chrono::duration_cast<std::chrono::milliseconds>(
+                 std::chrono::system_clock::now() - ts)
+                 .count()
+            << "ms" << std::endl;
+
   glFlush();
 }
 
@@ -132,6 +150,8 @@ cycle_color()
     _ts = ts;
 
     glutPostRedisplay();
+
+    exit(EXIT_SUCCESS);
   }
 }
 

@@ -46,6 +46,7 @@ load_map_from_pgm(const std::string& pgm_url,
       static_cast<GLfloat>(value) / static_cast<GLfloat>(max_value);
     ++idx;
   }
+  ifs.close();
   std::cout << "(size) = (" << idx << ")" << std::endl;
 
   for (size_t j = 0; j < height; ++j) {
@@ -57,4 +58,25 @@ load_map_from_pgm(const std::string& pgm_url,
   }
 }
 
+void
+save_map_to_pgm(const std::string& pgm_url,
+                const size_t width,
+                const size_t height,
+                GLubyte* texture_buffer,
+                const size_t texture_buffer_size)
+{
+  std::ofstream ofs(pgm_url, std::ios::binary);
+
+  ofs << "P2" << std::endl;
+  ofs << "# glamm output" << std::endl;
+  ofs << width << " " << height << std::endl;
+  ofs << "255" << std::endl;
+
+  for (size_t i = 0; i < texture_buffer_size - 1; ++i) {
+    ofs << static_cast<int>(texture_buffer[i]) << " ";
+  }
+  ofs << static_cast<int>(texture_buffer[texture_buffer_size - 1]);
+
+  ofs.close();
+}
 }
