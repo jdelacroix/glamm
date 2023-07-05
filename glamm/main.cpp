@@ -52,7 +52,7 @@ std::unique_ptr<glamm::RenderMergedMapShader> _render_merged_map_shader;
 
 std::unique_ptr<glamm::FrameBuffer> _front_frame_buffer, _back_frame_buffer;
 
-GLfloat _map_texture_buffer[1048576];
+GLfloat _map_texture_buffer[16384];
 unsigned int _map_texture_id;
 
 std::random_device _rd;
@@ -160,7 +160,7 @@ main(int argc, char** argv)
   _front_frame_buffer = std::make_unique<glamm::FrameBuffer>(_width, _height);
 
   glamm::load_map_from_pgm(
-    "maps/example_map.pgm", &_map_texture_buffer[0], 1048576);
+    "maps/example_map.pgm", &_map_texture_buffer[0], 16384);
 
   // for (size_t i = 0; i < 512; ++i) {
   //   _map_texture_buffer[i] = 1.0f;
@@ -183,7 +183,7 @@ main(int argc, char** argv)
                  8,
                  8,
                  0,
-                 GL_RGB,
+                 GL_RED,
                  GL_FLOAT,
                  &_map_texture_buffer[0]);
     glGenerateMipmap(GL_TEXTURE_2D);

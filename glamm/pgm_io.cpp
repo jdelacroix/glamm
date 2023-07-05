@@ -40,50 +40,21 @@ load_map_from_pgm(const std::string& pgm_url,
   buffer >> max_value;
   std::cout << "(max_value) = (" << max_value << ")" << std::endl;
 
-  // float float_value = 0.0f;
-
-  // for (size_t i = 0; i < (width * height); ++i) {
-  //   buffer >> value;
-
-  //   // float_value = static_cast<float>(value) /
-  //   static_cast<float>(max_value);
-
-  //   texture_buffer[3 * i] = value;
-  //   texture_buffer[3 * i + 1] = value;
-  //   texture_buffer[3 * i + 2] = value;
-  // }
-
-  std::vector<int> texture;
-  texture.reserve(width * height);
+  size_t idx = 0;
   while (buffer >> value) {
-    texture.push_back(value);
+    texture_buffer[idx] =
+      static_cast<GLfloat>(value) / static_cast<GLfloat>(max_value);
+    ++idx;
   }
-  std::cout << "(size) = (" << texture.size() << ")" << std::endl;
+  std::cout << "(size) = (" << idx << ")" << std::endl;
 
   for (size_t j = 0; j < height; ++j) {
     for (size_t i = 0; i < width; ++i) {
-      std::cout << std::setw(2) << texture[j * width + i] << " ";
+      std::cout << std::fixed << std::setprecision(1) << std::setw(2)
+                << texture_buffer[j * width + i] << " ";
     }
     std::cout << std::endl;
   }
-
-  GLfloat value_f;
-
-  for (size_t i = 0; i < texture.size(); ++i) {
-
-    value_f =
-      static_cast<GLfloat>(texture[i]) / static_cast<GLfloat>(max_value);
-    std::cout << std::fixed << std::setprecision(2) << std::setw(3) << value_f
-              << " ";
-    texture_buffer[3 * i] = value_f;
-    texture_buffer[3 * i + 1] = value_f;
-    texture_buffer[3 * i + 2] = value_f;
-
-    if (i % width == (width - 1)) {
-      std::cout << std::endl;
-    }
-  }
-  std::cout << std::endl;
 }
 
 }
