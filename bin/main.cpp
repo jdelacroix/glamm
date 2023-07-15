@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-#include "blit_maps_shader.hpp"
-#include "frame_buffer.hpp"
-#include "occupancy_grid_texture_map.hpp"
-#include "pgm_io.hpp"
-#include "render_merged_map_shader.hpp"
-#include "shader_program.hpp"
+#include "glamm/blit_maps_shader.hpp"
+#include "glamm/frame_buffer.hpp"
+#include "glamm/occupancy_grid_texture_map.hpp"
+#include "glamm/pgm_io.hpp"
+#include "glamm/render_merged_map_shader.hpp"
+#include "glamm/shader_program.hpp"
 
 #include <GL/glew.h>
 #include <GL/glut.h>

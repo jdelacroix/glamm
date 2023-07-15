@@ -10,15 +10,15 @@ find_package(GLEW REQUIRED)
 find_package(glm REQUIRED)
 
 include_directories(
+  ${CMAKE_CURRENT_SOURCE_DIR}
   ${OPENGL_INCLUDE_DIRS}
   ${GLUT_INCLUDE_DIRS}
   ${GLEW_INCLUDE_DIRS}
   ${GLM_INCLUDE_DIRS}
 )
 
-add_executable(
-  ${PROJECT_NAME}
-  glamm/main.cpp
+add_library(
+  ${PROJECT_NAME} STATIC
   # library
   glamm/blit_maps_shader.cpp
   glamm/frame_buffer.cpp
@@ -30,10 +30,22 @@ add_executable(
 
 target_link_libraries(
   ${PROJECT_NAME}
+  # dependencies
   ${OPENGL_LIBRARIES}
-  ${GLUT_LIBRARIES}
   ${GLEW_LIBRARIES}
   # ${GLM_LIBRARIES} header only
+)
+
+add_executable(
+  ${PROJECT_NAME}-viz
+  bin/main.cpp
+)
+
+target_link_libraries(
+  ${PROJECT_NAME}-viz
+  # dependencies
+  ${PROJECT_NAME}
+  ${GLUT_LIBRARIES}
 )
 
 # shaders
@@ -41,7 +53,7 @@ target_link_libraries(
 set(
   GLAMM_SHADERS
     blit_maps
-    render_merged_map
+    render_merged_map # viz only
 )
 
 foreach(SHADER IN LISTS GLAMM_SHADERS)
