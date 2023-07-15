@@ -1,5 +1,5 @@
 # glamm
-OpenGL Accelerated Map Merging (GLAMM)
+(Open)GL Accelerated Map Merging (GLAMM)
 
 ## Dependencies
 
