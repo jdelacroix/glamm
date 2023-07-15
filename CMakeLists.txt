@@ -9,12 +9,16 @@ find_package(GLUT REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(glm REQUIRED)
 
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(EGL REQUIRED egl)
+
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${OPENGL_INCLUDE_DIRS}
   ${GLUT_INCLUDE_DIRS}
   ${GLEW_INCLUDE_DIRS}
   ${GLM_INCLUDE_DIRS}
+  ${EGL_INCLUDE_DIRS}
 )
 
 add_library(
@@ -46,6 +50,18 @@ target_link_libraries(
   # dependencies
   ${PROJECT_NAME}
   ${GLUT_LIBRARIES}
+)
+
+add_executable(
+  ${PROJECT_NAME}-headless
+  bin/headless.cpp
+)
+
+target_link_libraries(
+  ${PROJECT_NAME}-headless
+  # dependencies
+  ${PROJECT_NAME}
+  ${EGL_LIBRARIES}
 )
 
 # shaders
