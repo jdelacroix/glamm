@@ -26,6 +26,9 @@
 
 ## What do the shaders do?
 
-1. `DrawMapShader` draws a new map to a buffer.
 2. `BlitMapsShader` merges the newest map with the previously merged maps.
-3. `RenderMergedMapShader` draw the merged map to the screen.
+3. (Optional) `RenderMergedMapShader` draw the merged map to the screen.
+
+## What are the maps?
+
+Currently, maps are stored in the PGM format and loaded from the filesystem as a texture. Each pixel is interpreted as a cell of the occupancy grid map.
