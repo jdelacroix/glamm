@@ -3,10 +3,19 @@ OpenGL Accelerated Map Merging (GLAMM)
 
 ## Dependencies
 
-- `freeglut-dev` for OpenGL accelerated visualization
+- OpenGL 3.2 ES for shaders
 - `libglew-dev` for loading OpenGL (extensions) > 1.0
 - `libglm-dev` for math
-- OpenGL 3.2 ES
+
+### Headless
+
+- `libgbm-dev` for Linux's Generic Buffer Manager
+- `libegl-dev` for X11-less rendering
+- `libegl-mesa0` for the Mesa implementation of EGL
+
+### Visualization
+
+- `freeglut-dev` for OpenGL accelerated visualization
 
 ## How does it work?
 
