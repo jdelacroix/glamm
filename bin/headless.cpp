@@ -22,6 +22,10 @@
 #include "glamm/pgm_io.hpp"
 #include "glamm/render_merged_map_shader.hpp"
 #include "glamm/shader_program.hpp"
+#include "glamm/virtual_display.hpp"
+
+#include <EGL/egl.h>
+#include <gbm.h>
 
 #include <GL/glew.h>
 
@@ -66,6 +70,16 @@ std::uniform_real_distribution<float> _distrib_yaw(-glm::pi<float>(),
 int
 main(int argc, char** argv)
 {
+  // initialize egl
+
+  std::unique_ptr<glamm::VirtualDisplay> display;
+  try {
+    display = std::make_unique<glamm::VirtualDisplay>();
+  } catch (const std::runtime_error& e) {
+    std::cerr << "Unable to create virtual display: " << e.what() << std::endl;
+    return EXIT_FAILURE;
+  }
+
   // initialize glew
   GLenum glerr = glewInit();
   if (glerr != GLEW_OK) {

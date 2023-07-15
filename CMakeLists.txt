@@ -11,6 +11,7 @@ find_package(glm REQUIRED)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(EGL REQUIRED egl)
+pkg_check_modules(GBM REQUIRED gbm)
 
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}
@@ -19,6 +20,7 @@ include_directories(
   ${GLEW_INCLUDE_DIRS}
   ${GLM_INCLUDE_DIRS}
   ${EGL_INCLUDE_DIRS}
+  ${GBM_INCLUDE_DIRS}
 )
 
 add_library(
@@ -55,6 +57,7 @@ target_link_libraries(
 add_executable(
   ${PROJECT_NAME}-headless
   bin/headless.cpp
+  glamm/virtual_display.cpp
 )
 
 target_link_libraries(
@@ -62,6 +65,7 @@ target_link_libraries(
   # dependencies
   ${PROJECT_NAME}
   ${EGL_LIBRARIES}
+  ${GBM_LIBRARIES}
 )
 
 # shaders
