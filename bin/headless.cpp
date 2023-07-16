@@ -118,7 +118,7 @@ main(int argc, char** argv)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D,
                  0,
-                 GL_RGBA32F,
+                 GL_RGBA8,
                  8,
                  8,
                  0,

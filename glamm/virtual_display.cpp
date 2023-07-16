@@ -76,8 +76,14 @@ VirtualDisplay::VirtualDisplay()
   //
 
   EGLint egl_config_attribs[] = {
-    EGL_BUFFER_SIZE,
-    32,
+    EGL_ALPHA_SIZE,
+    8,
+    EGL_RED_SIZE,
+    8,
+    EGL_GREEN_SIZE,
+    8,
+    EGL_BLUE_SIZE,
+    8,
     EGL_DEPTH_SIZE,
     EGL_DONT_CARE,
     EGL_STENCIL_SIZE,
@@ -90,157 +96,174 @@ VirtualDisplay::VirtualDisplay()
   };
 
   EGLint num_configs;
-  if (!eglGetConfigs(this->egl_display_, NULL, 0, &num_configs)) {
-    throw std::runtime_error("Unable to find any configurations.");
-  }
+  eglChooseConfig(this->egl_display_,
+                  egl_config_attribs,
+                  &this->egl_config_,
+                  1,
+                  &num_configs);
 
-  EGLConfig* configs = (EGLConfig*)malloc(num_configs * sizeof(EGLConfig));
-  if (!eglChooseConfig(this->egl_display_,
-                       egl_config_attribs,
-                       configs,
-                       num_configs,
-                       &num_configs)) {
-    throw std::runtime_error("Unable to fetch the configurations.");
-  }
+  // EGLint num_configs;
+  // if (!eglGetConfigs(this->egl_display_, NULL, 0, &num_configs)) {
+  //   throw std::runtime_error("Unable to find any configurations.");
+  // }
+
+  // EGLConfig* configs = (EGLConfig*)malloc(num_configs * sizeof(EGLConfig));
+  // if (!eglChooseConfig(this->egl_display_,
+  //                      egl_config_attribs,
+  //                      configs,
+  //                      num_configs,
+  //                      &num_configs)) {
+  //   throw std::runtime_error("Unable to fetch the configurations.");
+  // }
   if (num_configs == 0) {
-    throw std::runtime_error("No configurations were returned.");
+    throw std::runtime_error("No usable configurations were found.");
   }
 
-  bool has_match = false;
+  // bool has_match = false;
   std::cout << num_configs << " egl configs found." << std::endl;
-  for (int i = 0; i < num_configs; ++i) {
-    EGLint gbm_format;
+  // for (int i = 0; i < num_configs; ++i) {
+  //   EGLint gbm_format;
 
-    if (!eglGetConfigAttrib(
-          this->egl_display_, configs[i], EGL_NATIVE_VISUAL_ID, &gbm_format)) {
-      throw std::runtime_error("Unable to access configuration attributes.");
-    }
+  //   if (!eglGetConfigAttrib(
+  //         this->egl_display_, configs[i], EGL_NATIVE_VISUAL_ID, &gbm_format))
+  //         {
+  //     throw std::runtime_error("Unable to access configuration attributes.");
+  //   }
 
-    // std::cout << "gbm_format: ";
-    // switch (gbm_format) {
-    //   case GBM_FORMAT_XRGB8888:
-    //     std::cout << "GBM_FORMAT_XRGB8888";
-    //     break; //('X', 'R', '2', '4') /* [31:0] x:R:G:B 8:8:8:8 little endian
-    //     */
-    //   case GBM_FORMAT_XBGR8888:
-    //     std::cout << "GBM_FORMAT_XBGR8888";
-    //     break; //('X', 'B', '2', '4') /* [31:0] x:B:G:R 8:8:8:8 little endian
-    //     */
-    //   case GBM_FORMAT_RGBX8888:
-    //     std::cout << "GBM_FORMAT_RGBX8888";
-    //     break; //('R', 'X', '2', '4') /* [31:0] R:G:B:x 8:8:8:8 little endian
-    //     */
-    //   case GBM_FORMAT_BGRX8888:
-    //     std::cout << "GBM_FORMAT_BGRX8888";
-    //     break; //('B', 'X', '2', '4') /* [31:0] B:G:R:x 8:8:8:8 little endian
-    //     */
+  //   // std::cout << "gbm_format: ";
+  //   // switch (gbm_format) {
+  //   //   case GBM_FORMAT_XRGB8888:
+  //   //     std::cout << "GBM_FORMAT_XRGB8888";
+  //   //     break; //('X', 'R', '2', '4') /* [31:0] x:R:G:B 8:8:8:8 little
+  //   endian
+  //   //     */
+  //   //   case GBM_FORMAT_XBGR8888:
+  //   //     std::cout << "GBM_FORMAT_XBGR8888";
+  //   //     break; //('X', 'B', '2', '4') /* [31:0] x:B:G:R 8:8:8:8 little
+  //   endian
+  //   //     */
+  //   //   case GBM_FORMAT_RGBX8888:
+  //   //     std::cout << "GBM_FORMAT_RGBX8888";
+  //   //     break; //('R', 'X', '2', '4') /* [31:0] R:G:B:x 8:8:8:8 little
+  //   endian
+  //   //     */
+  //   //   case GBM_FORMAT_BGRX8888:
+  //   //     std::cout << "GBM_FORMAT_BGRX8888";
+  //   //     break; //('B', 'X', '2', '4') /* [31:0] B:G:R:x 8:8:8:8 little
+  //   endian
+  //   //     */
 
-    //   case GBM_FORMAT_ARGB8888:
-    //     std::cout << "GBM_FORMAT_ARGB8888";
-    //     break; //('A', 'R', '2', '4') /* [31:0] A:R:G:B 8:8:8:8 little endian
-    //     */
-    //   case GBM_FORMAT_ABGR8888:
-    //     std::cout << "GBM_FORMAT_ABGR8888";
-    //     break; //('A', 'B', '2', '4') /* [31:0] A:B:G:R 8:8:8:8 little endian
-    //     */
-    //   case GBM_FORMAT_RGBA8888:
-    //     std::cout << "GBM_FORMAT_RGBA8888";
-    //     break; //('R', 'A', '2', '4') /* [31:0] R:G:B:A 8:8:8:8 little endian
-    //     */
-    //   case GBM_FORMAT_BGRA8888:
-    //     std::cout << "GBM_FORMAT_BGRA8888";
-    //     break; //('B', 'A', '2', '4') /* [31:0] B:G:R:A 8:8:8:8 little endian
-    //     */
+  //   //   case GBM_FORMAT_ARGB8888:
+  //   //     std::cout << "GBM_FORMAT_ARGB8888";
+  //   //     break; //('A', 'R', '2', '4') /* [31:0] A:R:G:B 8:8:8:8 little
+  //   endian
+  //   //     */
+  //   //   case GBM_FORMAT_ABGR8888:
+  //   //     std::cout << "GBM_FORMAT_ABGR8888";
+  //   //     break; //('A', 'B', '2', '4') /* [31:0] A:B:G:R 8:8:8:8 little
+  //   endian
+  //   //     */
+  //   //   case GBM_FORMAT_RGBA8888:
+  //   //     std::cout << "GBM_FORMAT_RGBA8888";
+  //   //     break; //('R', 'A', '2', '4') /* [31:0] R:G:B:A 8:8:8:8 little
+  //   endian
+  //   //     */
+  //   //   case GBM_FORMAT_BGRA8888:
+  //   //     std::cout << "GBM_FORMAT_BGRA8888";
+  //   //     break; //('B', 'A', '2', '4') /* [31:0] B:G:R:A 8:8:8:8 little
+  //   endian
+  //   //     */
 
-    //   case GBM_FORMAT_XRGB2101010:
-    //     std::cout << "GBM_FORMAT_XRGB2101010";
-    //     break; //('X', 'R', '3', '0') /* [31:0] x:R:G:B 2:10:10:10 little
-    //     endian
-    //            //*/
-    //   case GBM_FORMAT_XBGR2101010:
-    //     std::cout << "GBM_FORMAT_XBGR2101010";
-    //     break; //('X', 'B', '3', '0') /* [31:0] x:B:G:R 2:10:10:10 little
-    //     endian
-    //            //*/
-    //   case GBM_FORMAT_RGBX1010102:
-    //     std::cout << "GBM_FORMAT_RGBX1010102";
-    //     break; //('R', 'X', '3', '0') /* [31:0] R:G:B:x 10:10:10:2 little
-    //     endian
-    //            //*/
-    //   case GBM_FORMAT_BGRX1010102:
-    //     std::cout << "GBM_FORMAT_BGRX1010102";
-    //     break; //('B', 'X', '3', '0') /* [31:0] B:G:R:x 10:10:10:2 little
-    //     endian
-    //            //*/
+  //   //   case GBM_FORMAT_XRGB2101010:
+  //   //     std::cout << "GBM_FORMAT_XRGB2101010";
+  //   //     break; //('X', 'R', '3', '0') /* [31:0] x:R:G:B 2:10:10:10 little
+  //   //     endian
+  //   //            //*/
+  //   //   case GBM_FORMAT_XBGR2101010:
+  //   //     std::cout << "GBM_FORMAT_XBGR2101010";
+  //   //     break; //('X', 'B', '3', '0') /* [31:0] x:B:G:R 2:10:10:10 little
+  //   //     endian
+  //   //            //*/
+  //   //   case GBM_FORMAT_RGBX1010102:
+  //   //     std::cout << "GBM_FORMAT_RGBX1010102";
+  //   //     break; //('R', 'X', '3', '0') /* [31:0] R:G:B:x 10:10:10:2 little
+  //   //     endian
+  //   //            //*/
+  //   //   case GBM_FORMAT_BGRX1010102:
+  //   //     std::cout << "GBM_FORMAT_BGRX1010102";
+  //   //     break; //('B', 'X', '3', '0') /* [31:0] B:G:R:x 10:10:10:2 little
+  //   //     endian
+  //   //            //*/
 
-    //   case GBM_FORMAT_ARGB2101010:
-    //     std::cout << "GBM_FORMAT_ARGB2101010";
-    //     break; //('A', 'R', '3', '0') /* [31:0] A:R:G:B 2:10:10:10 little
-    //     endian
-    //            //*/
-    //   case GBM_FORMAT_ABGR2101010:
-    //     std::cout << "GBM_FORMAT_ABGR2101010";
-    //     break; //('A', 'B', '3', '0') /* [31:0] A:B:G:R 2:10:10:10 little
-    //     endian
-    //            //*/
-    //   case GBM_FORMAT_RGBA1010102:
-    //     std::cout << "GBM_FORMAT_RGBA1010102";
-    //     break; //('R', 'A', '3', '0') /* [31:0] R:G:B:A 10:10:10:2 little
-    //     endian
-    //            //*/
-    //   case GBM_FORMAT_BGRA1010102:
-    //     std::cout << "GBM_FORMAT_BGRA1010102";
-    //     break;
-    //   default:
-    //     std::cout << "unknown";
-    // }
-    // std::cout << std::endl;
+  //   //   case GBM_FORMAT_ARGB2101010:
+  //   //     std::cout << "GBM_FORMAT_ARGB2101010";
+  //   //     break; //('A', 'R', '3', '0') /* [31:0] A:R:G:B 2:10:10:10 little
+  //   //     endian
+  //   //            //*/
+  //   //   case GBM_FORMAT_ABGR2101010:
+  //   //     std::cout << "GBM_FORMAT_ABGR2101010";
+  //   //     break; //('A', 'B', '3', '0') /* [31:0] A:B:G:R 2:10:10:10 little
+  //   //     endian
+  //   //            //*/
+  //   //   case GBM_FORMAT_RGBA1010102:
+  //   //     std::cout << "GBM_FORMAT_RGBA1010102";
+  //   //     break; //('R', 'A', '3', '0') /* [31:0] R:G:B:A 10:10:10:2 little
+  //   //     endian
+  //   //            //*/
+  //   //   case GBM_FORMAT_BGRA1010102:
+  //   //     std::cout << "GBM_FORMAT_BGRA1010102";
+  //   //     break;
+  //   //   default:
+  //   //     std::cout << "unknown";
+  //   // }
+  //   // std::cout << std::endl;
 
-    if (gbm_format == GBM_FORMAT_ARGB8888) {
-      this->egl_config_ = configs[i];
-      free(configs);
-      has_match = true;
-      break;
-    }
-  }
+  //   if (gbm_format == GBM_FORMAT_ARGB8888) {
+  //     this->egl_config_ = configs[i];
+  //     free(configs);
+  //     has_match = true;
+  //     break;
+  //   }
+  // }
 
-  if (!has_match) {
-    throw std::runtime_error(
-      "Unable to find a configuration with matching gbm format.");
-  }
+  // if (!has_match) {
+  //   throw std::runtime_error(
+  //     "Unable to find a configuration with matching gbm format.");
+  // }
 
   //
 
-  // TODO: promote hard coded window size to inputs
-  this->gbm_surface_ = gbm_surface_create(
-    this->gbm_device_, 1000, 1000, GBM_FORMAT_ARGB8888, GBM_BO_USE_RENDERING);
-  if (!this->gbm_surface_) {
-    throw std::runtime_error("Unable to create gbm surface.");
-  }
+  // this->gbm_surface_ = gbm_surface_create(
+  //   this->gbm_device_, 1000, 1000, GBM_FORMAT_ARGB8888,
+  //   GBM_BO_USE_RENDERING);
+  // if (!this->gbm_surface_) {
+  //   throw std::runtime_error("Unable to create gbm surface.");
+  // }
 
-  this->egl_surface_ =
-    eglCreateWindowSurface(this->egl_display_,
-                           this->egl_config_,
-                           (EGLNativeWindowType)this->gbm_surface_,
-                           NULL);
+  // this->egl_surface_ =
+  //   eglCreateWindowSurface(this->egl_display_,
+  //                          this->egl_config_,
+  //                          (EGLNativeWindowType)this->gbm_surface_,
+  //                          NULL);
 
-  if (this->egl_surface_ == EGL_NO_SURFACE) {
-    throw std::runtime_error("Unable to create egl surface.");
-  }
+  // if (this->egl_surface_ == EGL_NO_SURFACE) {
+  //   throw std::runtime_error("Unable to create egl surface.");
+  // }
 
-  static const EGLint context_attribs[] = { EGL_CONTEXT_CLIENT_VERSION,
-                                            2,
-                                            EGL_NONE };
+  static const EGLint context_attribs[] = {
+    EGL_CONTEXT_MAJOR_VERSION, 3, EGL_CONTEXT_MINOR_VERSION, 2, EGL_NONE
+  };
 
   this->egl_context_ = eglCreateContext(
     this->egl_display_, this->egl_config_, NULL, context_attribs);
-  if (!this->egl_context_)
+  // this->egl_context_ = eglCreateContext(
+  //   this->egl_display_, this->egl_config_, EGL_NO_CONTEXT, NULL);
+  if (!this->egl_context_) {
     throw std::runtime_error("Unable to create egl context.");
+  }
 
-  eglMakeCurrent(this->egl_display_,
-                 this->egl_surface_,
-                 this->egl_surface_,
-                 this->egl_context_);
+  eglMakeCurrent(
+    this->egl_display_, EGL_NO_SURFACE, EGL_NO_SURFACE, this->egl_context_);
 }
 
 }
