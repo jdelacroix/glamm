@@ -18,7 +18,7 @@
 
 #include "shader_program.hpp"
 
-#include <GL/glew.h>
+#include <epoxy/gl.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 

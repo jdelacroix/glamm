@@ -16,7 +16,7 @@
 
 #include "frame_buffer.hpp"
 
-#include <GL/glew.h>
+#include <epoxy/gl.h>
 
 #include <stdexcept>
 

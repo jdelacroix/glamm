@@ -1,7 +1,6 @@
 #pragma once
 
-#include <GL/glew.h>
-
+#include <epoxy/gl.h>
 #include <string>
 
 namespace glamm {

@@ -16,7 +16,7 @@
 
 #include "occupancy_grid_texture_map.hpp"
 
-#include <GL/glew.h>
+#include <epoxy/gl.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/extended_min_max.hpp>
 

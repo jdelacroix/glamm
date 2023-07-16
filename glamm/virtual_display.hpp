@@ -17,8 +17,8 @@
 
 #pragma once
 
-#include <EGL/egl.h>
-#include <EGL/eglext.h>
+// #include <EGL/egl.h>
+#include <epoxy/egl.h>
 #include <gbm.h>
 
 namespace glamm {
@@ -36,6 +36,7 @@ private:
   EGLDisplay egl_display_;
   EGLConfig egl_config_;
   EGLSurface egl_surface_;
+  EGLContext egl_context_;
 };
 
 }

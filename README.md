@@ -4,7 +4,7 @@
 ## Dependencies
 
 - OpenGL 3.2 ES for shaders
-- `libglew-dev` for loading OpenGL (extensions) > 1.0
+- `libepoxy-dev` for loading OpenGL (extensions) > 1.0
 - `libglm-dev` for math
 
 ### Headless

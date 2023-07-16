@@ -21,8 +21,8 @@
 #include "glamm/render_merged_map_shader.hpp"
 #include "glamm/shader_program.hpp"
 
-#include <GL/glew.h>
 #include <GL/glut.h>
+#include <epoxy/gl.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -61,6 +61,16 @@ std::uniform_real_distribution<float> _distrib(0.0f,
                                                static_cast<float>(_width));
 std::uniform_real_distribution<float> _distrib_yaw(-glm::pi<float>(),
                                                    glm::pi<float>());
+
+void
+abort_on_gl_error(const size_t line)
+{
+  GLenum glerr = glGetError();
+  if (glerr != GL_NO_ERROR) {
+    std::cerr << "(" << line << ") GL error: " << glerr << std::endl;
+    exit(EXIT_FAILURE);
+  }
+}
 
 void
 handle_key_event(unsigned char key, int x, int y)
@@ -168,11 +178,11 @@ main(int argc, char** argv)
   glutIdleFunc(&cycle_color);
 
   // initialize glew
-  GLenum glerr = glewInit();
-  if (glerr != GLEW_OK) {
-    std::cerr << "GLEW is not OK!" << std::endl;
-    return EXIT_FAILURE;
-  }
+  // GLenum glerr = glewInit();
+  // if (glerr != GLEW_OK) {
+  //   std::cerr << "GLEW is not OK!" << std::endl;
+  //   return EXIT_FAILURE;
+  // }
 
   _blit_maps_shader = std::make_unique<glamm::BlitMapsShader>(_width, _height);
   _render_merged_map_shader = std::make_unique<glamm::RenderMergedMapShader>();
@@ -199,13 +209,14 @@ main(int argc, char** argv)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D,
                  0,
-                 GL_RGBA,
+                 GL_RGBA32F,
                  8,
                  8,
                  0,
                  GL_RED,
                  GL_FLOAT,
                  &_map_texture_buffer[0]);
+    abort_on_gl_error(__LINE__);
     glGenerateMipmap(GL_TEXTURE_2D);
   }
 

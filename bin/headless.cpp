@@ -24,11 +24,8 @@
 #include "glamm/shader_program.hpp"
 #include "glamm/virtual_display.hpp"
 
-#include <EGL/egl.h>
+#include <epoxy/gl.h>
 #include <gbm.h>
-
-#include <GL/glew.h>
-
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -53,7 +50,7 @@ std::chrono::time_point<std::chrono::system_clock> _ts;
 unsigned int _width = 1000, _height = 1000;
 
 std::unique_ptr<glamm::BlitMapsShader> _blit_maps_shader;
-std::unique_ptr<glamm::RenderMergedMapShader> _render_merged_map_shader;
+// std::unique_ptr<glamm::RenderMergedMapShader> _render_merged_map_shader;
 
 std::unique_ptr<glamm::FrameBuffer> _front_frame_buffer, _back_frame_buffer;
 
@@ -66,6 +63,16 @@ std::uniform_real_distribution<float> _distrib(0.0f,
                                                static_cast<float>(_width));
 std::uniform_real_distribution<float> _distrib_yaw(-glm::pi<float>(),
                                                    glm::pi<float>());
+
+void
+abort_on_gl_error(const size_t line)
+{
+  GLenum glerr = glGetError();
+  if (glerr != GL_NO_ERROR) {
+    std::cerr << "(" << line << ") GL error: " << glerr << std::endl;
+    exit(EXIT_FAILURE);
+  }
+}
 
 int
 main(int argc, char** argv)
@@ -81,23 +88,22 @@ main(int argc, char** argv)
   }
 
   // initialize glew
-  GLenum glerr = glewInit();
-  if (glerr != GLEW_OK) {
-    std::cerr << "GLEW is not OK!" << std::endl;
-    return EXIT_FAILURE;
-  }
+  // GLenum glerr = glewInit();
+  // if (glerr != GLEW_OK && glerr != GLEW_ERROR_NO_GLX_DISPLAY) {
+  //   std::cerr << "GLEW is not OK! " << glerr << std::endl;
+  //   return EXIT_FAILURE;
+  // }
 
   _blit_maps_shader = std::make_unique<glamm::BlitMapsShader>(_width, _height);
-  _render_merged_map_shader = std::make_unique<glamm::RenderMergedMapShader>();
+  // _render_merged_map_shader =
+  // std::make_unique<glamm::RenderMergedMapShader>();
 
   _front_frame_buffer = std::make_unique<glamm::FrameBuffer>(_width, _height);
 
   glamm::load_map_from_pgm(
     "maps/example_map.pgm", &_map_texture_buffer[0], 16384);
 
-  // for (size_t i = 0; i < 512; ++i) {
-  //   _map_texture_buffer[i] = 1.0f;
-  // }
+  _front_frame_buffer->activate();
 
   auto ts = std::chrono::system_clock::now();
 
@@ -112,14 +118,18 @@ main(int argc, char** argv)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D,
                  0,
-                 GL_RGBA,
+                 GL_RGBA32F,
                  8,
                  8,
                  0,
                  GL_RED,
                  GL_FLOAT,
                  &_map_texture_buffer[0]);
+    abort_on_gl_error(__LINE__);
     glGenerateMipmap(GL_TEXTURE_2D);
+
+    abort_on_gl_error(__LINE__);
+    std::cout << "loaded: " << i << std::endl;
   }
 
   std::cout << "texture load time: "
@@ -148,8 +158,8 @@ main(int argc, char** argv)
       map, _map_texture_id, _front_frame_buffer->texture_id());
   }
 
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
-  glClear(GL_COLOR_BUFFER_BIT);
+  // glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  // glClear(GL_COLOR_BUFFER_BIT);
 
   std::cout << "benchmark: "
             << std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -157,25 +167,41 @@ main(int argc, char** argv)
                  .count()
             << "ms" << std::endl;
 
-  ts = std::chrono::system_clock::now();
-  _render_merged_map_shader->draw(_front_frame_buffer->texture_id());
+  // ts = std::chrono::system_clock::now();
+  // _render_merged_map_shader->draw(_front_frame_buffer->texture_id());
 
-  std::cout << "render time: "
-            << std::chrono::duration_cast<std::chrono::milliseconds>(
-                 std::chrono::system_clock::now() - ts)
-                 .count()
-            << "ms" << std::endl;
+  // std::cout << "render time: "
+  //           << std::chrono::duration_cast<std::chrono::milliseconds>(
+  //                std::chrono::system_clock::now() - ts)
+  //                .count()
+  //           << "ms" << std::endl;
 
   ts = std::chrono::system_clock::now();
 
   GLubyte output_buffer[_width * _height];
+  for (size_t i = 0; i < _width * _height; ++i) {
+    output_buffer[i] = 0; // initialize to black
+  }
 
-  glGetTextureImage(_front_frame_buffer->texture_id(),
-                    0,
-                    GL_RED,
-                    GL_UNSIGNED_BYTE,
-                    _width * _height,
-                    &output_buffer[0]);
+  // NOT AVAILABLE IN OPENGL ES
+  // glGetTextureImage(_front_frame_buffer->texture_id(),
+  //                   0,
+  //                   GL_RED,
+  //                   GL_UNSIGNED_BYTE,
+  //                   _width * _height,
+  //                   &output_buffer[0]);
+
+  // glActiveTexture(GL_TEXTURE0);
+  // glBindTexture(GL_TEXTURE_2D, _front_frame_buffer->texture_id());
+
+  glReadnPixels(0,
+                0,
+                _width,
+                _height,
+                GL_RED,
+                GL_UNSIGNED_BYTE,
+                _width * _height,
+                &output_buffer[0]);
 
   glamm::save_map_to_pgm(
     "output.pgm", _width, _height, &output_buffer[0], _width * _height);

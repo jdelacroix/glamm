@@ -6,21 +6,23 @@ set(CMAKE_CXX_STANDARD 14)
 
 find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED)
-find_package(GLEW REQUIRED)
+# find_package(GLEW REQUIRED)
 find_package(glm REQUIRED)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(EGL REQUIRED egl)
 pkg_check_modules(GBM REQUIRED gbm)
+pkg_check_modules(EPOXY REQUIRED epoxy)
 
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${OPENGL_INCLUDE_DIRS}
   ${GLUT_INCLUDE_DIRS}
-  ${GLEW_INCLUDE_DIRS}
+  # ${GLEW_INCLUDE_DIRS}
   ${GLM_INCLUDE_DIRS}
   ${EGL_INCLUDE_DIRS}
   ${GBM_INCLUDE_DIRS}
+  ${EXPOXY_INCLUDE_DIRS}
 )
 
 add_library(
@@ -38,8 +40,9 @@ target_link_libraries(
   ${PROJECT_NAME}
   # dependencies
   ${OPENGL_LIBRARIES}
-  ${GLEW_LIBRARIES}
+  # ${GLEW_LIBRARIES}
   # ${GLM_LIBRARIES} header only
+  ${EPOXY_LIBRARIES}
 )
 
 add_executable(
