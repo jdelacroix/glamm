@@ -16,7 +16,8 @@
 
 #include "frame_buffer.hpp"
 
-#include <epoxy/gl.h>
+// #include <epoxy/gl.h>
+#include <GLES3/gl31.h>
 
 #include <stdexcept>
 

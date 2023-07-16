@@ -17,8 +17,8 @@
 
 #pragma once
 
-// #include <EGL/egl.h>
-#include <epoxy/egl.h>
+#include <EGL/egl.h>
+// #include <epoxy/egl.h>
 #include <gbm.h>
 
 namespace glamm {

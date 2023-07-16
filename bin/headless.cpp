@@ -24,7 +24,9 @@
 #include "glamm/shader_program.hpp"
 #include "glamm/virtual_display.hpp"
 
-#include <epoxy/gl.h>
+// #include <epoxy/gl.h>
+#include <GLES3/gl31.h>
+
 #include <gbm.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -71,6 +73,8 @@ abort_on_gl_error(const size_t line)
   if (glerr != GL_NO_ERROR) {
     std::cerr << "(" << line << ") GL error: " << glerr << std::endl;
     exit(EXIT_FAILURE);
+  } else {
+    // std::cout << "GL_NO_ERROR!" << std::endl;
   }
 }
 
@@ -105,6 +109,8 @@ main(int argc, char** argv)
 
   _front_frame_buffer->activate();
 
+  abort_on_gl_error(__LINE__);
+
   auto ts = std::chrono::system_clock::now();
 
   for (size_t i = 0; i < 10000; ++i) {
@@ -118,7 +124,7 @@ main(int argc, char** argv)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D,
                  0,
-                 GL_RGBA8,
+                 GL_RGBA32F,
                  8,
                  8,
                  0,
@@ -129,7 +135,6 @@ main(int argc, char** argv)
     glGenerateMipmap(GL_TEXTURE_2D);
 
     abort_on_gl_error(__LINE__);
-    std::cout << "loaded: " << i << std::endl;
   }
 
   std::cout << "texture load time: "
@@ -194,14 +199,14 @@ main(int argc, char** argv)
   // glActiveTexture(GL_TEXTURE0);
   // glBindTexture(GL_TEXTURE_2D, _front_frame_buffer->texture_id());
 
-  glReadnPixels(0,
-                0,
-                _width,
-                _height,
-                GL_RED,
-                GL_UNSIGNED_BYTE,
-                _width * _height,
-                &output_buffer[0]);
+  glReadPixels(0,
+               0,
+               _width,
+               _height,
+               GL_RED,
+               GL_UNSIGNED_BYTE,
+               // _width * _height,
+               &output_buffer[0]);
 
   glamm::save_map_to_pgm(
     "output.pgm", _width, _height, &output_buffer[0], _width * _height);
@@ -213,6 +218,10 @@ main(int argc, char** argv)
             << "ms" << std::endl;
 
   glFlush();
+
+  std::cout << "Computed with OpenGL " << glGetString(GL_VERSION) << std::endl;
+
+  std::cout << "done." << std::endl;
 
   return EXIT_SUCCESS;
 }

@@ -13,6 +13,7 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(EGL REQUIRED egl)
 pkg_check_modules(GBM REQUIRED gbm)
 pkg_check_modules(EPOXY REQUIRED epoxy)
+pkg_check_modules(GLES REQUIRED glesv2)
 
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}
@@ -23,6 +24,7 @@ include_directories(
   ${EGL_INCLUDE_DIRS}
   ${GBM_INCLUDE_DIRS}
   ${EXPOXY_INCLUDE_DIRS}
+  ${GLES_INCLUDE_DIRS}
 )
 
 add_library(
@@ -43,19 +45,20 @@ target_link_libraries(
   # ${GLEW_LIBRARIES}
   # ${GLM_LIBRARIES} header only
   ${EPOXY_LIBRARIES}
+  ${GLES_LIBRARIES}
 )
 
-add_executable(
-  ${PROJECT_NAME}-viz
-  bin/main.cpp
-)
+# add_executable(
+#   ${PROJECT_NAME}-viz
+#   bin/main.cpp
+# )
 
-target_link_libraries(
-  ${PROJECT_NAME}-viz
-  # dependencies
-  ${PROJECT_NAME}
-  ${GLUT_LIBRARIES}
-)
+# target_link_libraries(
+#   ${PROJECT_NAME}-viz
+#   # dependencies
+#   ${PROJECT_NAME}
+#   ${GLUT_LIBRARIES}
+# )
 
 add_executable(
   ${PROJECT_NAME}-headless

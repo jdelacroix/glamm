@@ -1,6 +1,8 @@
 #pragma once
 
-#include <epoxy/gl.h>
+// #include <epoxy/gl.h>
+#include <GLES3/gl31.h>
+
 #include <string>
 
 namespace glamm {

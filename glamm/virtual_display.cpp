@@ -44,19 +44,21 @@ VirtualDisplay::VirtualDisplay()
 
   //
 
-  int fd = open("/dev/dri/card0", O_RDWR);
-  if (fd < 0) {
-    throw std::runtime_error("Unable to access /dev/dri/card0.");
-  }
+  // int fd = open("/dev/dri/card0", O_RDWR);
+  // if (fd < 0) {
+  //   throw std::runtime_error("Unable to access /dev/dri/card0.");
+  // }
 
-  this->gbm_device_ = gbm_create_device(fd);
-  if (!this->gbm_device_) {
-    throw std::runtime_error("Unable to create gbm device.");
-  }
+  // this->gbm_device_ = gbm_create_device(fd);
+  // if (!this->gbm_device_) {
+  //   throw std::runtime_error("Unable to create gbm device.");
+  // }
 
   // this->egl_display_ =
   //   eglGetPlatformDisplayEXT(EGL_PLATFORM_GBM_MESA, this->gbm_device_, NULL);
-  this->egl_display_ = eglGetDisplay(this->gbm_device_);
+  // this->egl_display_ = eglGetDisplay(this->gbm_device_);
+
+  this->egl_display_ = eglGetDisplay(EGL_DEFAULT_DISPLAY);
 
   if (this->egl_display_ == EGL_NO_DISPLAY) {
     throw std::runtime_error("Unable to create egl display.");
@@ -69,30 +71,44 @@ VirtualDisplay::VirtualDisplay()
     std::cout << "egl version: " << major << "." << minor << std::endl;
   }
 
-  if (!eglBindAPI(EGL_OPENGL_ES_API)) {
-    throw std::runtime_error("Unable to bind to EGL_OPENGL_ES_API.");
-  }
-
   //
 
-  EGLint egl_config_attribs[] = {
-    EGL_ALPHA_SIZE,
-    8,
-    EGL_RED_SIZE,
-    8,
-    EGL_GREEN_SIZE,
-    8,
-    EGL_BLUE_SIZE,
-    8,
-    EGL_DEPTH_SIZE,
-    EGL_DONT_CARE,
-    EGL_STENCIL_SIZE,
-    EGL_DONT_CARE,
-    EGL_RENDERABLE_TYPE,
-    EGL_OPENGL_ES3_BIT,
-    EGL_SURFACE_TYPE,
-    EGL_WINDOW_BIT,
-    EGL_NONE,
+  // EGLint egl_config_attribs[] = {
+  //   EGL_ALPHA_SIZE,
+  //   8,
+  //   EGL_RED_SIZE,
+  //   8,
+  //   EGL_GREEN_SIZE,
+  //   8,
+  //   EGL_BLUE_SIZE,
+  //   8,
+  //   EGL_DEPTH_SIZE,
+  //   EGL_DONT_CARE,
+  //   EGL_STENCIL_SIZE,
+  //   EGL_DONT_CARE,
+  //   EGL_RENDERABLE_TYPE,
+  //   EGL_OPENGL_ES3_BIT,
+  //   EGL_SURFACE_TYPE,
+  //   EGL_WINDOW_BIT,
+  //   EGL_NONE,
+  // };
+
+  EGLint egl_config_attribs[] = { EGL_SURFACE_TYPE,
+                                  EGL_PBUFFER_BIT,
+                                  EGL_BLUE_SIZE,
+                                  8,
+                                  EGL_GREEN_SIZE,
+                                  8,
+                                  EGL_RED_SIZE,
+                                  8,
+                                  EGL_DEPTH_SIZE,
+                                  8,
+                                  EGL_RENDERABLE_TYPE,
+                                  EGL_OPENGL_ES3_BIT,
+                                  EGL_NONE };
+
+  static const EGLint pbuffer_attribs[] = {
+    EGL_WIDTH, 1000, EGL_HEIGHT, 1000, EGL_NONE,
   };
 
   EGLint num_configs;
@@ -240,6 +256,12 @@ VirtualDisplay::VirtualDisplay()
   //   throw std::runtime_error("Unable to create gbm surface.");
   // }
 
+  EGLSurface surface = eglCreatePbufferSurface(
+    this->egl_display_, this->egl_config_, pbuffer_attribs);
+  if (surface == EGL_NO_SURFACE) {
+    throw std::runtime_error("Failed to create EGL surface!");
+  }
+
   // this->egl_surface_ =
   //   eglCreateWindowSurface(this->egl_display_,
   //                          this->egl_config_,
@@ -250,12 +272,16 @@ VirtualDisplay::VirtualDisplay()
   //   throw std::runtime_error("Unable to create egl surface.");
   // }
 
-  static const EGLint context_attribs[] = {
-    EGL_CONTEXT_MAJOR_VERSION, 3, EGL_CONTEXT_MINOR_VERSION, 2, EGL_NONE
-  };
+  static const EGLint context_attribs[] = { EGL_CONTEXT_CLIENT_VERSION,
+                                            3,
+                                            EGL_NONE };
+
+  if (!eglBindAPI(EGL_OPENGL_API)) {
+    throw std::runtime_error("Unable to bind to EGL_OPENGL_ES_API.");
+  }
 
   this->egl_context_ = eglCreateContext(
-    this->egl_display_, this->egl_config_, NULL, context_attribs);
+    this->egl_display_, this->egl_config_, EGL_NO_CONTEXT, context_attribs);
   // this->egl_context_ = eglCreateContext(
   //   this->egl_display_, this->egl_config_, EGL_NO_CONTEXT, NULL);
   if (!this->egl_context_) {

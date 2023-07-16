@@ -22,7 +22,8 @@
 #include "glamm/shader_program.hpp"
 
 #include <GL/glut.h>
-#include <epoxy/gl.h>
+#include <GLES3/gl31.h>
+// #include <epoxy/gl.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
