@@ -21,13 +21,15 @@
 // #include <epoxy/egl.h>
 #include <gbm.h>
 
+#include <string>
+
 namespace glamm {
 
 class VirtualDisplay
 {
 
 public:
-  VirtualDisplay();
+  VirtualDisplay(const std::string& dri_device);
 
 private:
   struct gbm_device* gbm_device_;

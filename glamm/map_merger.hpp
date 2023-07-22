@@ -16,18 +16,26 @@
 
 #pragma once
 
+#include "blit_maps_shader.hpp"
+#include "frame_buffer.hpp"
+#include "occupancy_grid_texture_map.hpp"
+
+#include <string>
+
 namespace glamm {
 
-class RenderMergedMapShader
+class MapMerger
 {
 public:
-  RenderMergedMapShader();
+  MapMerger(const size_t width, const size_t height);
 
-  void draw(const unsigned int tbo) const;
+  void merge_map(const OccupancyGridTextureMap& map);
+  void save(const std::string& pgm_url) const;
 
 private:
-  unsigned int shader_id_;
-  unsigned int vao_, vbo_, ebo_;
+  FrameBuffer frame_buffer_;
+  BlitMapsShader shader_;
+  size_t width_, height_;
 };
 
 }

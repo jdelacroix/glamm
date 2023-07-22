@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <GLES3/gl32.h>
 #include <glm/glm.hpp>
 
 #include <array>
@@ -31,16 +32,20 @@ public:
                           const float position_y,
                           const float orientation_z,
                           const float width,
-                          const float height);
+                          const float height,
+                          const GLfloat* texture_buffer,
+                          const size_t texture_size);
 
   virtual ~OccupancyGridTextureMap();
 
   void draw() const;
+  unsigned int texture_id() const;
   glm::mat4 model() const;
 
 private:
   glm::mat4 model_;
   unsigned int vao_, vbo_, ebo_;
+  unsigned int texture_id_;
 };
 
 }

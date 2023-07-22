@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
+// same as main.cpp, but without glut
+
 #include "glamm/blit_maps_shader.hpp"
 #include "glamm/frame_buffer.hpp"
+#include "glamm/map_merger.hpp"
 #include "glamm/occupancy_grid_texture_map.hpp"
 #include "glamm/pgm_io.hpp"
-#include "glamm/render_merged_map_shader.hpp"
 #include "glamm/shader_program.hpp"
+#include "glamm/virtual_display.hpp"
 
-#include <GL/glut.h>
-#include <GLES3/gl31.h>
 // #include <epoxy/gl.h>
+#include <GLES3/gl31.h>
 
+#include <gbm.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -48,11 +51,6 @@ std::chrono::time_point<std::chrono::system_clock> _ts;
 
 unsigned int _width = 1000, _height = 1000;
 
-std::unique_ptr<glamm::BlitMapsShader> _blit_maps_shader;
-std::unique_ptr<glamm::RenderMergedMapShader> _render_merged_map_shader;
-
-std::unique_ptr<glamm::FrameBuffer> _front_frame_buffer, _back_frame_buffer;
-
 GLfloat _map_texture_buffer[16384];
 unsigned int _map_texture_id;
 
@@ -70,44 +68,38 @@ abort_on_gl_error(const size_t line)
   if (glerr != GL_NO_ERROR) {
     std::cerr << "(" << line << ") GL error: " << glerr << std::endl;
     exit(EXIT_FAILURE);
+  } else {
+    // std::cout << "GL_NO_ERROR!" << std::endl;
   }
 }
 
-void
-handle_key_event(unsigned char key, int x, int y)
+int
+main(int argc, char** argv)
 {
-  switch (key) {
-    // escape key
-    case '\x1B': {
-      exit(EXIT_SUCCESS);
-      break;
-    }
-  }
-}
+  // initialize egl
 
-void
-display()
-{
+  std::unique_ptr<glamm::VirtualDisplay> display;
+  try {
+    display = std::make_unique<glamm::VirtualDisplay>("/dev/dri/card0");
+  } catch (const std::runtime_error& e) {
+    std::cerr << "Unable to create virtual display: " << e.what() << std::endl;
+    return EXIT_FAILURE;
+  }
+
+  glamm::MapMerger map_merger(_width, _height);
+
+  glamm::load_map_from_pgm(
+    "maps/example_map.pgm", &_map_texture_buffer[0], 16384);
 
   auto ts = std::chrono::system_clock::now();
 
-  glViewport(0, 0, _width, _height);
-
-  _front_frame_buffer->activate();
-
-  glClearColor(0.5f, 0.5f, 0.5f, 0.0f); // gray
-  glClear(GL_COLOR_BUFFER_BIT);
-
   for (size_t i = 0; i < 100; ++i) {
     const float c_x = 500.0f - _distrib(_gen), c_y = 500.0f - _distrib(_gen);
-    glamm::OccupancyGridTextureMap map(c_x, c_y, _distrib_yaw(_gen), 100, 100);
+    glamm::OccupancyGridTextureMap map(
+      c_x, c_y, _distrib_yaw(_gen), 100, 100, &_map_texture_buffer[0], 8 * 8);
 
-    _blit_maps_shader->draw(
-      map, _map_texture_id, _front_frame_buffer->texture_id());
+    map_merger.merge_map(map);
   }
-
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
-  glClear(GL_COLOR_BUFFER_BIT);
 
   std::cout << "benchmark: "
             << std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -115,121 +107,11 @@ display()
                  .count()
             << "ms" << std::endl;
 
-  ts = std::chrono::system_clock::now();
-  _render_merged_map_shader->draw(_front_frame_buffer->texture_id());
+  map_merger.save("output.pgm");
 
-  std::cout << "render time: "
-            << std::chrono::duration_cast<std::chrono::milliseconds>(
-                 std::chrono::system_clock::now() - ts)
-                 .count()
-            << "ms" << std::endl;
+  std::cout << "Computed with OpenGL " << glGetString(GL_VERSION) << std::endl;
 
-  ts = std::chrono::system_clock::now();
-
-  GLubyte output_buffer[_width * _height];
-
-  glGetTextureImage(_front_frame_buffer->texture_id(),
-                    0,
-                    GL_RED,
-                    GL_UNSIGNED_BYTE,
-                    _width * _height,
-                    &output_buffer[0]);
-
-  glamm::save_map_to_pgm(
-    "output.pgm", _width, _height, &output_buffer[0], _width * _height);
-
-  std::cout << "save time: "
-            << std::chrono::duration_cast<std::chrono::milliseconds>(
-                 std::chrono::system_clock::now() - ts)
-                 .count()
-            << "ms" << std::endl;
-
-  glFlush();
-}
-
-void
-cycle_color()
-{
-
-  auto ts = std::chrono::system_clock::now();
-
-  if (std::chrono::duration_cast<std::chrono::milliseconds>(ts - _ts) >=
-      std::chrono::milliseconds(40)) {
-
-    std::cin.ignore();
-
-    _ts = ts;
-
-    glutPostRedisplay();
-
-    exit(EXIT_SUCCESS);
-  }
-}
-
-int
-main(int argc, char** argv)
-{
-  // initialize glut
-  glutInit(&argc, argv);
-
-  glutInitWindowSize(_width, _height);
-  glutCreateWindow("Hello, world!");
-  glutKeyboardFunc(&handle_key_event);
-  glutDisplayFunc(&display);
-  glutIdleFunc(&cycle_color);
-
-  // initialize glew
-  // GLenum glerr = glewInit();
-  // if (glerr != GLEW_OK) {
-  //   std::cerr << "GLEW is not OK!" << std::endl;
-  //   return EXIT_FAILURE;
-  // }
-
-  _blit_maps_shader = std::make_unique<glamm::BlitMapsShader>(_width, _height);
-  _render_merged_map_shader = std::make_unique<glamm::RenderMergedMapShader>();
-
-  _front_frame_buffer = std::make_unique<glamm::FrameBuffer>(_width, _height);
-
-  glamm::load_map_from_pgm(
-    "maps/example_map.pgm", &_map_texture_buffer[0], 16384);
-
-  // for (size_t i = 0; i < 512; ++i) {
-  //   _map_texture_buffer[i] = 1.0f;
-  // }
-
-  auto ts = std::chrono::system_clock::now();
-
-  for (size_t i = 0; i < 10000; ++i) {
-
-    glGenTextures(1, &_map_texture_id);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, _map_texture_id);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D,
-                 0,
-                 GL_RGBA32F,
-                 8,
-                 8,
-                 0,
-                 GL_RED,
-                 GL_FLOAT,
-                 &_map_texture_buffer[0]);
-    abort_on_gl_error(__LINE__);
-    glGenerateMipmap(GL_TEXTURE_2D);
-  }
-
-  std::cout << "texture load time: "
-            << std::chrono::duration_cast<std::chrono::milliseconds>(
-                 std::chrono::system_clock::now() - ts)
-                 .count()
-            << "ms" << std::endl;
-
-  // create framebuffers
-  _ts = std::chrono::system_clock::now();
-  glutMainLoop();
+  std::cout << "done." << std::endl;
 
   return EXIT_SUCCESS;
 }

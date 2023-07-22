@@ -30,7 +30,9 @@ OccupancyGridTextureMap::OccupancyGridTextureMap(const float position_x,
                                                  const float position_y,
                                                  const float orientation_z,
                                                  const float width,
-                                                 const float height)
+                                                 const float height,
+                                                 const GLfloat* texture_buffer,
+                                                 const size_t texture_size)
 {
   // position is location at center of map
 
@@ -73,6 +75,26 @@ OccupancyGridTextureMap::OccupancyGridTextureMap(const float position_x,
   model_ = glm::mat4(1.0f);
   model_ = glm::translate(model_, glm::vec3(position_x, position_y, 0.0f));
   model_ = glm::rotate(model_, orientation_z, glm::vec3(0.0f, 0.0f, 1.0f));
+
+  // load texture
+
+  glGenTextures(1, &this->texture_id_);
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, this->texture_id_);
+  // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexImage2D(GL_TEXTURE_2D,
+               0,
+               GL_RGBA32F,
+               8,
+               8,
+               0,
+               GL_RED,
+               GL_FLOAT,
+               &texture_buffer[0]);
+  glGenerateMipmap(GL_TEXTURE_2D);
 }
 
 OccupancyGridTextureMap::~OccupancyGridTextureMap()
@@ -88,6 +110,12 @@ OccupancyGridTextureMap::draw() const
   glBindVertexArray(this->vao_);
   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
   // glBindVertexArray(0);
+}
+
+unsigned int
+OccupancyGridTextureMap::texture_id() const
+{
+  return this->texture_id_;
 }
 
 glm::mat4

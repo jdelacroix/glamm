@@ -26,14 +26,12 @@
 
 namespace glamm {
 
-VirtualDisplay::VirtualDisplay()
+VirtualDisplay::VirtualDisplay(const std::string& dri_device)
 {
 
   // https://registry.khronos.org/EGL/extensions/MESA/EGL_MESA_platform_gbm.txt
 
-  //
-
-  int fd = open("/dev/dri/card0", O_RDWR);
+  int fd = open(dri_device.c_str(), O_RDWR);
   if (fd < 0) {
     throw std::runtime_error("Unable to access /dev/dri/card0.");
   }
@@ -46,8 +44,7 @@ VirtualDisplay::VirtualDisplay()
   // this->egl_display_ =
   //   eglGetPlatformDisplayEXT(EGL_PLATFORM_GBM_MESA, this->gbm_device_, NULL);
   this->egl_display_ = eglGetDisplay(this->gbm_device_);
-
-  // this->egl_display_ = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+  // this->egl_dispay_ = eglGetDisplay(EGL_DEFAULT_DISPLAY);
 
   if (this->egl_display_ == EGL_NO_DISPLAY) {
     throw std::runtime_error("Unable to create egl display.");
@@ -59,28 +56,6 @@ VirtualDisplay::VirtualDisplay()
   } else {
     std::cout << "egl version: " << major << "." << minor << std::endl;
   }
-
-  //
-
-  // EGLint egl_config_attribs[] = {
-  //   EGL_ALPHA_SIZE,
-  //   8,
-  //   EGL_RED_SIZE,
-  //   8,
-  //   EGL_GREEN_SIZE,
-  //   8,
-  //   EGL_BLUE_SIZE,
-  //   8,
-  //   EGL_DEPTH_SIZE,
-  //   EGL_DONT_CARE,
-  //   EGL_STENCIL_SIZE,
-  //   EGL_DONT_CARE,
-  //   EGL_RENDERABLE_TYPE,
-  //   EGL_OPENGL_ES3_BIT,
-  //   EGL_SURFACE_TYPE,
-  //   EGL_WINDOW_BIT,
-  //   EGL_NONE,
-  // };
 
   EGLint egl_config_attribs[] = { EGL_SURFACE_TYPE,
                                   EGL_WINDOW_BIT,
@@ -98,10 +73,6 @@ VirtualDisplay::VirtualDisplay()
                                   EGL_OPENGL_ES3_BIT,
                                   EGL_NONE };
 
-  // static const EGLint pbuffer_attribs[] = {
-  //   EGL_WIDTH, 1000, EGL_HEIGHT, 1000, EGL_NONE,
-  // };
-
   EGLint num_configs;
   eglChooseConfig(this->egl_display_,
                   egl_config_attribs,
@@ -109,47 +80,15 @@ VirtualDisplay::VirtualDisplay()
                   1,
                   &num_configs);
 
-  // EGLint num_configs;
-  // if (!eglGetConfigs(this->egl_display_, NULL, 0, &num_configs)) {
-  //   throw std::runtime_error("Unable to find any configurations.");
-  // }
-
-  // EGLConfig* configs = (EGLConfig*)malloc(num_configs * sizeof(EGLConfig));
-  // if (!eglChooseConfig(this->egl_display_,
-  //                      egl_config_attribs,
-  //                      configs,
-  //                      num_configs,
-  //                      &num_configs)) {
-  //   throw std::runtime_error("Unable to fetch the configurations.");
-  // }
   if (num_configs == 0) {
     throw std::runtime_error("No usable configurations were found.");
   }
-
-  // bool has_match = false;
-  std::cout << num_configs << " egl configs found." << std::endl;
-  // for (int i = 0; i < num_configs; ++i) {
-  //   EGLint gbm_format;
-
-  //   if (!eglGetConfigAttrib(
-  //         this->egl_display_, configs[i], EGL_NATIVE_VISUAL_ID, &gbm_format))
-  //         {
-  //     throw std::runtime_error("Unable to access configuration attributes.");
-  //   }
-
-  //
 
   this->gbm_surface_ = gbm_surface_create(
     this->gbm_device_, 1000, 1000, GBM_FORMAT_ARGB8888, GBM_BO_USE_RENDERING);
   if (!this->gbm_surface_) {
     throw std::runtime_error("Unable to create gbm surface.");
   }
-
-  // EGLSurface surface = eglCreatePbufferSurface(
-  //   this->egl_display_, this->egl_config_, pbuffer_attribs);
-  // if (surface == EGL_NO_SURFACE) {
-  //   throw std::runtime_error("Failed to create EGL surface!");
-  // }
 
   this->egl_surface_ =
     eglCreateWindowSurface(this->egl_display_,
@@ -171,8 +110,6 @@ VirtualDisplay::VirtualDisplay()
 
   this->egl_context_ = eglCreateContext(
     this->egl_display_, this->egl_config_, EGL_NO_CONTEXT, context_attribs);
-  // this->egl_context_ = eglCreateContext(
-  //   this->egl_display_, this->egl_config_, EGL_NO_CONTEXT, NULL);
   if (!this->egl_context_) {
     throw std::runtime_error("Unable to create egl context.");
   }
