@@ -32,7 +32,8 @@ OccupancyGridTextureMap::OccupancyGridTextureMap(const float position_x,
                                                  const float width,
                                                  const float height,
                                                  const GLfloat* texture_buffer,
-                                                 const size_t texture_size)
+                                                 const size_t texture_width,
+                                                 const size_t texture_height)
 {
   // position is location at center of map
 
@@ -88,8 +89,8 @@ OccupancyGridTextureMap::OccupancyGridTextureMap(const float position_x,
   glTexImage2D(GL_TEXTURE_2D,
                0,
                GL_RGBA32F,
-               8,
-               8,
+               texture_width,
+               texture_height,
                0,
                GL_RED,
                GL_FLOAT,

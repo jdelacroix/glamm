@@ -34,7 +34,8 @@ public:
                           const float width,
                           const float height,
                           const GLfloat* texture_buffer,
-                          const size_t texture_size);
+                          const size_t texture_width,
+                          const size_t texture_height);
 
   virtual ~OccupancyGridTextureMap();
 

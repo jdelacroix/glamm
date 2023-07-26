@@ -17,10 +17,10 @@ main()
 
   fragment_color = merged_map_color;
 
-  if (map_color.r != 0.5 && merged_map_color.a == 1.0) {
-    fragment_color = vec4(0.31, 0.78, 0.45, 1.0);
-    return;
-  }
+  // if (map_color.r != 0.5 && merged_map_color.a == 1.0) {
+  //   fragment_color = vec4(0.31, 0.78, 0.45, 1.0);
+  //   return;
+  // }
 
   if (map_color.r != 0.5) {
     if (map_color.r == 0.0 || merged_map_color.r == 0.5) {

@@ -93,10 +93,19 @@ main(int argc, char** argv)
 
   auto ts = std::chrono::system_clock::now();
 
-  for (size_t i = 0; i < 100; ++i) {
-    const float c_x = 500.0f - _distrib(_gen), c_y = 500.0f - _distrib(_gen);
+  // for (size_t i = 0; i < 100; ++i) {
+  //   const float c_x = 500.0f - _distrib(_gen), c_y = 500.0f - _distrib(_gen);
+  //   glamm::OccupancyGridTextureMap map(
+  //     c_x, c_y, _distrib_yaw(_gen), 100, 100, &_map_texture_buffer[0], 8 *
+  //     8);
+
+  //   map_merger.merge_map(map);
+  // }
+
+  for (size_t i = 0; i < 10; ++i) {
+    const float c_x = (i * 10), c_y = 0.0;
     glamm::OccupancyGridTextureMap map(
-      c_x, c_y, _distrib_yaw(_gen), 100, 100, &_map_texture_buffer[0], 8 * 8);
+      c_x, c_y, 0.0, 100, 100, &_map_texture_buffer[0], 10, 10);
 
     map_merger.merge_map(map);
   }
