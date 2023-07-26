@@ -40,7 +40,7 @@ make
 eog ./output.pgm
 ```
 
-Below is the output of merging 10 8x8 chessboards, where each chessboard is moved to the right by one square. The merge policy will persist all obstacles (black square) even if a new map provides free space (white square) over an existing obstacle (black square). Consequently, all overlapping columns (first and last are non-overlapping) are completely occupied (black squares).
+Below is the output of merging 10 10x10 chessboards, where each chessboard is moved to the right by one square. The merge policy will persist all obstacles (black square) even if a new map provides free space (white square) over an existing obstacle (black square). Consequently, all overlapping columns (first and last are non-overlapping) are completely occupied (black squares).
 
 ![Example Output](img/simple_overlap_prototype.jpg)
 
