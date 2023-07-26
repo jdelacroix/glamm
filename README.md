@@ -47,3 +47,7 @@ Below is the output of merging 10 10x10 chessboards, where each chessboard is mo
 ## How do I customize the merge policy?
 
 `glamm/shaders/blit_maps.fs` is the fragment shader and determines the output (merged) color based on the new map (`input_texture`) and previously merged texture (`output_texture`). Change the logic in this shader to provide your own merge policy.
+
+## Was this tested?
+
+Yes, on x86_64 platform with the Intel UHD 630 GPU using OpenGL 4.6, as well as, with some modification on a Raspberry Pi 4  using its GPU via OpenGL 3.1 ES (by changing device to `/dev/dri/card1` and changing the shaders to use `#version 310 es`).
