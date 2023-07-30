@@ -51,3 +51,10 @@ Below is the output of merging 10 10x10 chessboards, where each chessboard is mo
 ## Was this tested?
 
 Yes, on x86_64 platform with the Intel UHD 630 GPU using OpenGL 4.6, as well as, with some modification on a Raspberry Pi 4  using its GPU via OpenGL 3.1 ES (by changing device to `/dev/dri/card1` and changing the shaders to use `#version 310 es`).
+
+## What could be improved?
+
+1. Explicitly specify resolution and metric sizes as part of the API
+2. Error checking and graceful exits
+3. Check for memory leaks
+4. Example with actual occupancy grid maps

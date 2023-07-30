@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- EGL versions prior to 1.5 require casting to `EGLNativeDisplayType`
+
 ## [0.1.0] - 2023-07-25
 
 ### Added

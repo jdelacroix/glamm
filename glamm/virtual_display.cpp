@@ -43,7 +43,7 @@ VirtualDisplay::VirtualDisplay(const std::string& dri_device)
 
   // this->egl_display_ =
   //   eglGetPlatformDisplayEXT(EGL_PLATFORM_GBM_MESA, this->gbm_device_, NULL);
-  this->egl_display_ = eglGetDisplay(this->gbm_device_);
+  this->egl_display_ = eglGetDisplay((EGLNativeDisplayType)this->gbm_device_);
   // this->egl_dispay_ = eglGetDisplay(EGL_DEFAULT_DISPLAY);
 
   if (this->egl_display_ == EGL_NO_DISPLAY) {
